@@ -10,80 +10,135 @@
   
   <style>
     /* Ghana Health Service Color Scheme - Preserved Exactly */
+    :root {
+      --primary-green: #006400;
+      --dark-green: #004d00;
+      --light-blue: #f0f8ff;
+      --white: #ffffff;
+      --light-red: #ffcccc;
+      --light-pink: #ffccff;
+      --light-yellow: #ffffcc;
+    }
+    
     body {
-      font-family: Arial, sans-serif;
-      margin: 20px;
-      background-color: #f0f8ff; /* Light blue background */
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      margin: 0;
+      padding: 20px;
+      background-color: var(--light-blue);
+      line-height: 1.6;
     }
 
     h1, h2 {
-      color: #006400; /* Dark green (Ghana Health Service color) */
+      color: var(--primary-green);
+    }
+
+    h1 {
+      text-align: center;
+      margin-bottom: 30px;
+      border-bottom: 2px solid var(--primary-green);
+      padding-bottom: 10px;
+    }
+
+    section {
+      margin-bottom: 30px;
+      background-color: var(--white);
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
     }
 
     form {
       margin-bottom: 20px;
-      background-color: #ffffff; /* White */
-      padding: 20px;
-      border-radius: 8px;
-      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     }
 
     label {
       display: block;
-      margin-top: 10px;
-      color: #006400; /* Dark green */
+      margin-top: 15px;
+      color: var(--primary-green);
+      font-weight: bold;
     }
 
     input, select, button {
       margin-top: 5px;
-      padding: 8px;
+      padding: 10px;
       width: 100%;
       max-width: 300px;
-      border: 1px solid #006400; /* Dark green */
+      border: 1px solid var(--primary-green);
       border-radius: 4px;
+      box-sizing: border-box;
     }
 
     button {
-      background-color: #006400; /* Dark green */
-      color: #ffffff; /* White */
+      background-color: var(--primary-green);
+      color: var(--white);
       border: none;
       cursor: pointer;
+      font-weight: bold;
+      transition: background-color 0.3s;
+      margin-top: 15px;
     }
 
     button:hover {
-      background-color: #004d00; /* Darker green */
+      background-color: var(--dark-green);
+    }
+
+    button.secondary {
+      background-color: #6c757d;
+    }
+
+    button.secondary:hover {
+      background-color: #545b62;
+    }
+
+    button.danger {
+      background-color: #dc3545;
+    }
+
+    button.danger:hover {
+      background-color: #c82333;
     }
 
     table {
       width: 100%;
       border-collapse: collapse;
       margin-top: 20px;
-      background-color: #ffffff; /* White */
+      background-color: var(--white);
       border-radius: 8px;
-      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      overflow: hidden;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
     }
 
     th, td {
       border: 1px solid #ddd;
-      padding: 8px;
+      padding: 12px;
       text-align: left;
     }
 
     th {
-      background-color: #006400; /* Dark green */
-      color: #ffffff; /* White */
+      background-color: var(--primary-green);
+      color: var(--white);
+      position: sticky;
+      top: 0;
+    }
+
+    tr:nth-child(even) {
+      background-color: #f9f9f9;
+    }
+
+    tr:hover {
+      background-color: #f1f1f1;
     }
 
     .highlight-red {
-      background-color: #ffcccc; /* Light red for defaulters */
+      background-color: var(--light-red);
     }
 
     .highlight-pink {
-      background-color: #ffccff; /* Light pink for upcoming visits */
+      background-color: var(--light-pink);
     }
 
     .highlight-yellow {
-      background-color: #ffffcc; /* Light yellow for due soon */
+      background-color: var(--light-yellow);
     }
 
     /* Modal Styles */
@@ -102,36 +157,72 @@
 
     .modal-content {
       background-color: white;
-      padding: 20px;
+      padding: 25px;
       border-radius: 8px;
-      width: 80%;
-      max-width: 800px;
-      max-height: 80%;
+      width: 90%;
+      max-width: 900px;
+      max-height: 85vh;
       overflow-y: auto;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
     }
 
     .close {
       float: right;
       cursor: pointer;
-      color: #006400; /* Dark green */
-      font-size: 24px;
+      color: var(--primary-green);
+      font-size: 28px;
       font-weight: bold;
+      line-height: 1;
+    }
+
+    .close:hover {
+      color: var(--dark-green);
     }
 
     /* Footer */
     footer {
-      margin-top: 20px;
+      margin-top: 30px;
       text-align: center;
-      color: #006400; /* Dark green */
+      color: var(--primary-green);
+      padding: 15px;
+      border-top: 1px solid var(--primary-green);
     }
 
     /* Responsive Design */
+    @media (max-width: 768px) {
+      body {
+        padding: 10px;
+      }
+      
+      section {
+        padding: 15px;
+      }
+      
+      table {
+        font-size: 14px;
+      }
+      
+      th, td {
+        padding: 8px;
+      }
+    }
+
     @media (max-width: 600px) {
       input, select, button {
         width: 100%;
       }
-      table {
-        font-size: 12px;
+      
+      .stats-container {
+        flex-direction: column;
+      }
+      
+      .tab-buttons {
+        flex-wrap: wrap;
+      }
+      
+      .tab-button {
+        flex: 1;
+        min-width: 120px;
       }
     }
 
@@ -148,9 +239,10 @@
 
     .vaccine-item {
       margin-bottom: 10px;
-      padding: 8px;
+      padding: 10px;
       border: 1px solid #eee;
       border-radius: 4px;
+      background-color: #f9f9f9;
     }
 
     /* Stats Cards */
@@ -164,21 +256,24 @@
     .stat-card {
       background-color: white;
       border-radius: 8px;
-      padding: 15px;
-      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      padding: 20px;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
       flex: 1;
       min-width: 200px;
+      text-align: center;
+      border-top: 4px solid var(--primary-green);
     }
 
     .stat-card h3 {
       margin-top: 0;
-      color: #006400;
+      color: var(--primary-green);
+      font-size: 16px;
     }
 
     .stat-value {
-      font-size: 24px;
+      font-size: 28px;
       font-weight: bold;
-      color: #006400;
+      color: var(--primary-green);
     }
 
     /* Tabs */
@@ -188,29 +283,32 @@
 
     .tab-buttons {
       display: flex;
-      margin-bottom: 10px;
+      margin-bottom: 0;
+      border-bottom: 1px solid #ddd;
     }
 
     .tab-button {
-      padding: 10px 15px;
-      background-color: #e0e0e0;
+      padding: 12px 20px;
+      background-color: #e9ecef;
       border: none;
       cursor: pointer;
       margin-right: 5px;
       border-radius: 4px 4px 0 0;
+      font-weight: bold;
+      transition: all 0.3s;
     }
 
     .tab-button.active {
-      background-color: #006400;
+      background-color: var(--primary-green);
       color: white;
     }
 
     .tab-content {
       display: none;
-      padding: 15px;
+      padding: 20px;
       background-color: white;
       border-radius: 0 0 4px 4px;
-      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
     }
 
     .tab-content.active {
@@ -221,19 +319,34 @@
     .loading {
       display: none;
       text-align: center;
-      padding: 10px;
-      color: #006400;
+      padding: 20px;
+      color: var(--primary-green);
+    }
+
+    .spinner {
+      border: 4px solid rgba(0, 100, 0, 0.1);
+      border-left-color: var(--primary-green);
+      border-radius: 50%;
+      width: 40px;
+      height: 40px;
+      animation: spin 1s linear infinite;
+      margin: 0 auto 15px;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
     }
 
     /* Offline indicator */
     .offline-indicator {
       display: none;
-      background-color: #ffcccc;
+      background-color: var(--light-red);
       color: #990000;
-      padding: 10px;
+      padding: 12px;
       text-align: center;
       margin-bottom: 20px;
       border-radius: 4px;
+      font-weight: bold;
     }
 
     /* Action buttons container */
@@ -247,33 +360,150 @@
     .action-buttons button {
       flex: 1;
       min-width: 150px;
+      margin-top: 0;
+    }
+
+    /* Search box */
+    .search-container {
+      margin-bottom: 20px;
+    }
+
+    .search-container input {
+      max-width: 100%;
+      padding: 12px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+    }
+
+    /* Notifications */
+    .notification {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      padding: 15px 20px;
+      border-radius: 4px;
+      color: white;
+      font-weight: bold;
+      z-index: 1100;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+      transform: translateX(150%);
+      transition: transform 0.3s ease;
+    }
+
+    .notification.show {
+      transform: translateX(0);
+    }
+
+    .notification.success {
+      background-color: #28a745;
+    }
+
+    .notification.error {
+      background-color: #dc3545;
+    }
+
+    .notification.info {
+      background-color: #17a2b8;
+    }
+
+    /* Print styles */
+    @media print {
+      body {
+        background-color: white;
+        padding: 0;
+      }
+      
+      section {
+        box-shadow: none;
+        border: 1px solid #ddd;
+      }
+      
+      button, .action-buttons, .tab-buttons, .search-container, footer {
+        display: none;
+      }
+      
+      .modal {
+        display: none !important;
+      }
+    }
+
+    /* Vaccine status badges */
+    .status-badge {
+      display: inline-block;
+      padding: 4px 8px;
+      border-radius: 4px;
+      font-size: 12px;
+      font-weight: bold;
+    }
+    
+    .status-completed {
+      background-color: #d4edda;
+      color: #155724;
+    }
+    
+    .status-pending {
+      background-color: #fff3cd;
+      color: #856404;
+    }
+    
+    .status-overdue {
+      background-color: #f8d7da;
+      color: #721c24;
+    }
+    
+    /* Quick actions */
+    .quick-actions {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+    }
+    
+    .quick-actions button {
+      flex: 1;
+      min-width: 120px;
+      margin-top: 0;
     }
   </style>
 </head>
 <body>
   <!-- Offline Indicator -->
   <div id="offlineIndicator" class="offline-indicator">
-    You are currently offline. The app will work with limited functionality.
+    ⚠️ You are currently offline. The app will work with limited functionality.
   </div>
 
-  <h1>Immunization Tracker</h1>
+  <!-- Notification Area -->
+  <div id="notificationArea"></div>
+
+  <h1>🏥 Immunization Tracker</h1>
 
   <!-- Loading Indicator -->
-  <div id="loadingIndicator" class="loading">Loading data...</div>
+  <div id="loadingIndicator" class="loading">
+    <div class="spinner"></div>
+    <p>Loading data...</p>
+  </div>
+
+  <!-- Quick Actions -->
+  <div class="quick-actions">
+    <button onclick="scrollToSection('registration')">➕ Register Child</button>
+    <button onclick="scrollToSection('childHealthRegister')">📋 View Register</button>
+    <button onclick="scrollToSection('dashboard')">📊 View Dashboard</button>
+    <button onclick="showTodayAppointments()">📅 Today's Appointments</button>
+  </div>
 
   <!-- Facility Name Section -->
   <section id="facility">
-    <h2>Facility Name</h2>
+    <h2>🏛️ Facility Information</h2>
     <form id="facilityForm">
       <label for="facilityName">Facility Name:</label>
       <input type="text" id="facilityName" required>
-      <button type="submit">Save Facility Name</button>
+      <button type="submit">💾 Save Facility Name</button>
     </form>
   </section>
 
   <!-- Stats Section -->
   <section id="stats">
-    <h2>Statistics</h2>
+    <h2>📈 Statistics</h2>
     <div class="stats-container">
       <div class="stat-card">
         <h3>Total Children</h3>
@@ -296,7 +526,7 @@
 
   <!-- Section 1.0: Registration Form -->
   <section id="registration">
-    <h2>Register Child</h2>
+    <h2>👶 Register Child</h2>
     <form id="registrationForm">
       <label for="childName">Child's Name:</label>
       <input type="text" id="childName" required>
@@ -316,14 +546,16 @@
       <label for="contact">Contact (Optional):</label>
       <input type="text" id="contact">
 
-      <button type="submit">Register</button>
+      <button type="submit">✅ Register Child</button>
     </form>
   </section>
 
   <!-- Section 1.1: Child Health Register -->
   <section id="childHealthRegister">
-    <h2>Child Health Register</h2>
-    <input type="text" id="search" placeholder="Search by name or reg no." oninput="filterChildren()">
+    <h2>📋 Child Health Register</h2>
+    <div class="search-container">
+      <input type="text" id="search" placeholder="🔍 Search by name or registration number..." oninput="filterChildren()">
+    </div>
     <table id="childTable">
       <thead>
         <tr>
@@ -342,19 +574,19 @@
     </table>
     
     <div class="action-buttons">
-      <button onclick="exportToCSV()">Export to CSV</button>
-      <button onclick="printRecords()">Print Records</button>
-      <button onclick="backupData()">Backup Data</button>
+      <button onclick="exportToCSV()">📤 Export to CSV</button>
+      <button onclick="printRecords()">🖨️ Print Records</button>
+      <button onclick="backupData()">💾 Backup Data</button>
       <input type="file" id="restoreFile" accept=".json" style="display: none;">
-      <button onclick="document.getElementById('restoreFile').click()">Restore Data</button>
-      <button onclick="clearAllData()" style="background-color: #ff0000; color: white;">Clear All Data</button>
-      <button onclick="openHelpModal()">Help/Instructions</button>
+      <button onclick="document.getElementById('restoreFile').click()">📥 Restore Data</button>
+      <button onclick="clearAllData()" class="danger">🗑️ Clear All Data</button>
+      <button onclick="openHelpModal()">❓ Help/Instructions</button>
     </div>
   </section>
 
   <!-- Section 1.2: Dashboard -->
   <section id="dashboard">
-    <h2>Dashboard</h2>
+    <h2>📊 Dashboard</h2>
     <div class="tab-container">
       <div class="tab-buttons">
         <button class="tab-button active" onclick="openTab('allRecords')">All Records</button>
@@ -442,7 +674,7 @@
   <div id="immunizationModal" class="modal">
     <div class="modal-content">
       <span class="close" onclick="closeModal()">&times;</span>
-      <h2>Immunization Schedule</h2>
+      <h2>💉 Immunization Schedule</h2>
       <table id="immunizationTable">
         <thead>
           <tr>
@@ -458,7 +690,7 @@
           <!-- Rows will be populated dynamically -->
         </tbody>
       </table>
-      <button onclick="promptToBookNextVisit()">Save</button>
+      <button onclick="promptToBookNextVisit()">💾 Save</button>
     </div>
   </div>
 
@@ -466,7 +698,7 @@
   <div id="bookingModal" class="modal">
     <div class="modal-content">
       <span class="close" onclick="closeBookingModal()">&times;</span>
-      <h2>Book Next Visit</h2>
+      <h2>📅 Book Next Visit</h2>
       <div class="booking-form">
         <h3>Select Vaccines for Next Visit:</h3>
         <div id="vaccineSelection">
@@ -474,7 +706,7 @@
         </div>
         <label for="nextVisitDate">Next Visit Date:</label>
         <input type="date" id="nextVisitDate" required>
-        <button onclick="saveBooking()">Confirm Booking</button>
+        <button onclick="saveBooking()">✅ Confirm Booking</button>
       </div>
     </div>
   </div>
@@ -483,13 +715,13 @@
   <div id="viewRecordsModal" class="modal">
     <div class="modal-content">
       <span class="close" onclick="closeViewRecordsModal()">&times;</span>
-      <h2>View Immunization Records</h2>
+      <h2>📋 View Immunization Records</h2>
       <div>
         <label for="selectChildren">Select Child(ren):</label>
         <select id="selectChildren" multiple>
           <!-- Options will be populated dynamically -->
         </select>
-        <button onclick="viewSelectedChildrenRecords()">View Records</button>
+        <button onclick="viewSelectedChildrenRecords()">👁️ View Records</button>
       </div>
       <table id="viewRecordsTable">
         <thead>
@@ -516,7 +748,7 @@
   <div id="editChildModal" class="modal">
     <div class="modal-content">
       <span class="close" onclick="closeEditChildModal()">&times;</span>
-      <h2>Edit Child Details</h2>
+      <h2>✏️ Edit Child Details</h2>
       <form id="editChildForm">
         <label for="editChildName">Child's Name:</label>
         <input type="text" id="editChildName" required>
@@ -536,8 +768,30 @@
         <label for="editContact">Contact (Optional):</label>
         <input type="text" id="editContact">
 
-        <button type="button" onclick="saveEditedChild()">Save Changes</button>
+        <button type="button" onclick="saveEditedChild()">💾 Save Changes</button>
       </form>
+    </div>
+  </div>
+
+  <!-- Modal for Today's Appointments -->
+  <div id="todayAppointmentsModal" class="modal">
+    <div class="modal-content">
+      <span class="close" onclick="closeTodayAppointmentsModal()">&times;</span>
+      <h2>📅 Today's Appointments</h2>
+      <table id="todayAppointmentsTable">
+        <thead>
+          <tr>
+            <th>Reg No.</th>
+            <th>Name</th>
+            <th>Scheduled Vaccine</th>
+            <th>Contact</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <!-- Rows will be populated dynamically -->
+        </tbody>
+      </table>
     </div>
   </div>
 
@@ -545,30 +799,45 @@
   <div id="helpModal" class="modal">
     <div class="modal-content">
       <span class="close" onclick="closeHelpModal()">&times;</span>
-      <h2>Help/Instructions</h2>
-      <p>1. Register a child using the registration form.</p>
-      <p>2. Update immunization records by clicking "Update" next to a child's name.</p>
-      <p>3. Use the dashboard tabs to view defaulters, due soon, or all records.</p>
-      <p>4. Export data to CSV or print records for offline use.</p>
-      <p>5. Backup and restore data using the respective buttons.</p>
-      <p>6. Clear all data if needed (use with caution).</p>
-      <p>7. When saving immunization records, you'll be prompted to book the next visit.</p>
-      <p>8. Select vaccines for the next visit and set the date in the booking form.</p>
+      <h2>❓ Help/Instructions</h2>
+      <div style="max-height: 60vh; overflow-y: auto;">
+        <h3>Getting Started</h3>
+        <p>1. Register a child using the registration form.</p>
+        <p>2. Update immunization records by clicking "Update" next to a child's name.</p>
+        <p>3. Use the dashboard tabs to view defaulters, due soon, or all records.</p>
+        
+        <h3>Data Management</h3>
+        <p>4. Export data to CSV or print records for offline use.</p>
+        <p>5. Backup and restore data using the respective buttons.</p>
+        <p>6. Clear all data if needed (use with caution).</p>
+        
+        <h3>Vaccination Workflow</h3>
+        <p>7. When saving immunization records, you'll be prompted to book the next visit.</p>
+        <p>8. Select vaccines for the next visit and set the date in the booking form.</p>
+        <p>9. Use the "Today's Appointments" button to quickly view today's scheduled visits.</p>
+        
+        <h3>Tips</h3>
+        <p>• Use the search function to quickly find children in the register.</p>
+        <p>• The app works completely offline - no internet connection required.</p>
+        <p>• Data is automatically saved as you work.</p>
+        <p>• Use the quick action buttons at the top for easy navigation.</p>
+      </div>
     </div>
   </div>
 
   <!-- Footer -->
   <footer>
-    Developed By NASARE SURAJ
+    Developed By NASARE SURAJ | Immunization Tracker v2.0
   </footer>
 
   <script>
     // Initialize Dexie database
     const db = new Dexie('ImmunizationTrackerDB');
-    db.version(1).stores({
-      children: '++id, regNo, name, dob, sex, address, contact, isDefaulter',
-      vaccinations: '++id, childId, vaccine, dateGiven, batchNumber, placeGiven, remarks, nextVisit',
-      facility: 'id, name'
+    db.version(2).stores({
+      children: '++id, regNo, name, dob, sex, address, contact, isDefaulter, createdAt',
+      vaccinations: '++id, childId, vaccine, dateGiven, batchNumber, placeGiven, remarks, nextVisit, status',
+      facility: 'id, name, updatedAt',
+      settings: 'id, value'
     });
 
     // Global variables
@@ -591,7 +860,7 @@
         }
         
         // Load children data
-        children = await db.children.toArray();
+        children = await db.children.orderBy('createdAt').reverse().toArray();
         
         // Load vaccinations for each child
         for (let child of children) {
@@ -602,9 +871,10 @@
         updateStats();
         updateChildTable();
         updateAllTables();
+        showNotification('App loaded successfully!', 'success');
       } catch (error) {
         console.error('Error initializing app:', error);
-        alert('Error loading data. Please refresh the page.');
+        showNotification('Error loading data. Please refresh the page.', 'error');
       } finally {
         showLoading(false);
       }
@@ -615,13 +885,41 @@
       document.getElementById('loadingIndicator').style.display = show ? 'block' : 'none';
     }
 
+    // Show notification
+    function showNotification(message, type = 'info') {
+      const notificationArea = document.getElementById('notificationArea');
+      const notification = document.createElement('div');
+      notification.className = `notification ${type}`;
+      notification.textContent = message;
+      notificationArea.appendChild(notification);
+      
+      // Show notification
+      setTimeout(() => {
+        notification.classList.add('show');
+      }, 100);
+      
+      // Hide after 5 seconds
+      setTimeout(() => {
+        notification.classList.remove('show');
+        setTimeout(() => {
+          notification.remove();
+        }, 300);
+      }, 5000);
+    }
+
     // Check online/offline status
     window.addEventListener('online', updateOnlineStatus);
     window.addEventListener('offline', updateOnlineStatus);
     
     function updateOnlineStatus() {
       const offlineIndicator = document.getElementById('offlineIndicator');
-      offlineIndicator.style.display = navigator.onLine ? 'none' : 'block';
+      if (!navigator.onLine) {
+        offlineIndicator.style.display = 'block';
+        showNotification('You are now offline. The app will continue to work.', 'info');
+      } else {
+        offlineIndicator.style.display = 'none';
+        showNotification('Connection restored.', 'success');
+      }
     }
     
     // Initialize online status
@@ -633,11 +931,15 @@
       facilityName = document.getElementById('facilityName').value;
       
       try {
-        await db.facility.put({ id: 1, name: facilityName });
-        alert('Facility name saved successfully!');
+        await db.facility.put({ 
+          id: 1, 
+          name: facilityName,
+          updatedAt: new Date()
+        });
+        showNotification('Facility name saved successfully!', 'success');
       } catch (error) {
         console.error('Error saving facility name:', error);
-        alert('Error saving facility name. Please try again.');
+        showNotification('Error saving facility name. Please try again.', 'error');
       }
     });
 
@@ -682,7 +984,11 @@
     // Generate unique registration number
     function generateRegNo() {
       const year = new Date().getFullYear();
-      let count = children.filter(child => child.regNo.startsWith(year)).length + 1;
+      let count = children.filter(child => {
+        const childYear = new Date(child.createdAt || new Date()).getFullYear();
+        return childYear === year;
+      }).length + 1;
+      
       let regNo = `${String(count).padStart(3, '0')}/${year}`;
 
       // Ensure the registration number is unique
@@ -704,12 +1010,12 @@
 
       // Check if child already exists
       if (children.some(child => child.name.toLowerCase() === childName.toLowerCase())) {
-        alert('Child already registered.');
+        showNotification('Child already registered.', 'error');
         return;
       }
 
       if (new Date(dob) > today) {
-        alert('Date of Birth cannot be in the future.');
+        showNotification('Date of Birth cannot be in the future.', 'error');
         return;
       }
 
@@ -721,7 +1027,8 @@
           sex: document.getElementById('sex').value,
           address: document.getElementById('address').value,
           contact: document.getElementById('contact').value,
-          isDefaulter: false
+          isDefaulter: false,
+          createdAt: new Date()
         });
 
         // Add the new child to the local array
@@ -734,18 +1041,22 @@
           address: document.getElementById('address').value,
           contact: document.getElementById('contact').value,
           isDefaulter: false,
-          vaccinations: []
+          vaccinations: [],
+          createdAt: new Date()
         };
         
-        children.push(newChild);
+        children.unshift(newChild);
         
         updateChildTable();
         updateStats();
         this.reset();
-        alert('You have successfully registered a new child!');
+        showNotification('Child registered successfully!', 'success');
+        
+        // Scroll to show the new entry
+        scrollToSection('childHealthRegister');
       } catch (error) {
         console.error('Error registering child:', error);
-        alert('Error registering child. Please try again.');
+        showNotification('Error registering child. Please try again.', 'error');
       }
     });
 
@@ -753,6 +1064,11 @@
     function updateChildTable(filteredChildren = children) {
       const tbody = document.querySelector('#childTable tbody');
       tbody.innerHTML = '';
+
+      if (filteredChildren.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="7" style="text-align: center;">No children found</td></tr>';
+        return;
+      }
 
       filteredChildren.forEach((child, index) => {
         const row = document.createElement('tr');
@@ -764,9 +1080,9 @@
           <td>${child.address}</td>
           <td>${child.contact || 'N/A'}</td>
           <td>
-            <button onclick="openImmunizationModal(${index})">Update</button>
-            <button onclick="openEditChildModal(${index})">Edit</button>
-            <button onclick="deleteChild(${index})">Delete</button>
+            <button onclick="openImmunizationModal(${index})">💉 Update</button>
+            <button onclick="openEditChildModal(${index})">✏️ Edit</button>
+            <button onclick="deleteChild(${index})" class="danger">🗑️ Delete</button>
           </td>
         `;
         tbody.appendChild(row);
@@ -808,10 +1124,10 @@
         updateChildTable();
         updateViewRecordsModal();
         closeEditChildModal();
-        alert('Child details updated successfully!');
+        showNotification('Child details updated successfully!', 'success');
       } catch (error) {
         console.error('Error updating child:', error);
-        alert('Error updating child details. Please try again.');
+        showNotification('Error updating child details. Please try again.', 'error');
       }
     }
 
@@ -841,9 +1157,9 @@
         row.innerHTML = `
           <td>${vaccine}</td>
           <td><input type="date" class="dateGiven" value="${unsavedDate || existingVaccine?.dateGiven || ''}" onchange="trackUnsavedDate(this, '${childKey}', '${vaccine}')"></td>
-          <td><input type="text" class="batchNumber" value="${existingVaccine?.batchNumber || ''}" required></td>
-          <td><input type="text" class="placeGiven" value="${existingVaccine?.placeGiven || ''}" required></td>
-          <td><input type="text" class="remarks" value="${existingVaccine?.remarks || ''}" required></td>
+          <td><input type="text" class="batchNumber" value="${existingVaccine?.batchNumber || ''}" placeholder="Enter batch number"></td>
+          <td><input type="text" class="placeGiven" value="${existingVaccine?.placeGiven || ''}" placeholder="Enter place given"></td>
+          <td><input type="text" class="remarks" value="${existingVaccine?.remarks || ''}" placeholder="Enter remarks"></td>
           <td>${formatDate(existingVaccine?.nextVisit) || 'N/A'}</td>
         `;
         tbody.appendChild(row);
@@ -913,6 +1229,11 @@
           vaccineSelection.appendChild(vaccineItem);
         });
         document.getElementById('nextVisitDate').disabled = false;
+        
+        // Set default date to tomorrow
+        const tomorrow = new Date();
+        tomorrow.setDate(tomorrow.getDate() + 1);
+        document.getElementById('nextVisitDate').valueAsDate = tomorrow;
       }
     }
 
@@ -926,13 +1247,13 @@
     function saveBooking() {
       const nextVisitDate = document.getElementById('nextVisitDate').value;
       if (!nextVisitDate) {
-        alert('Please select a next visit date.');
+        showNotification('Please select a next visit date.', 'error');
         return;
       }
 
       const checkboxes = document.querySelectorAll('.vaccine-checkbox:checked');
       if (checkboxes.length === 0) {
-        alert('Please select at least one vaccine for the next visit.');
+        showNotification('Please select at least one vaccine for the next visit.', 'error');
         return;
       }
 
@@ -956,7 +1277,7 @@
 
         if (dateGiven && (!batchNumber || !placeGiven || !remarks)) {
           isValid = false;
-          alert('Batch Number, Place Given, and Remarks are mandatory when Date Given is selected.');
+          showNotification('Batch Number, Place Given, and Remarks are mandatory when Date Given is selected.', 'error');
         }
       });
 
@@ -984,7 +1305,8 @@
                 batchNumber,
                 placeGiven,
                 remarks,
-                nextVisit: '' // We'll handle next visits separately
+                nextVisit: '', // We'll handle next visits separately
+                status: dateGiven ? 'completed' : 'pending'
               })
             );
           }
@@ -1001,7 +1323,8 @@
                 batchNumber: '',
                 placeGiven: '',
                 remarks: '',
-                nextVisit: nextVisitDate
+                nextVisit: nextVisitDate,
+                status: 'scheduled'
               })
             );
           });
@@ -1028,10 +1351,10 @@
         updateChildTable();
         updateStats();
         updateAllTables();
-        alert('Immunization data saved successfully!');
+        showNotification('Immunization data saved successfully!', 'success');
       } catch (error) {
         console.error('Error saving immunization data:', error);
-        alert('Error saving immunization data. Please try again.');
+        showNotification('Error saving immunization data. Please try again.', 'error');
       }
     }
 
@@ -1063,9 +1386,15 @@
       modal.style.display = 'none';
     }
 
+    // Close Today's Appointments Modal
+    function closeTodayAppointmentsModal() {
+      const modal = document.getElementById('todayAppointmentsModal');
+      modal.style.display = 'none';
+    }
+
     // Delete Child
     async function deleteChild(index) {
-      if (confirm('Are you sure you want to delete this child?')) {
+      if (confirm('Are you sure you want to delete this child and all their vaccination records?')) {
         const child = children[index];
         
         try {
@@ -1080,9 +1409,10 @@
           updateViewRecordsModal();
           updateStats();
           updateAllTables();
+          showNotification('Child deleted successfully.', 'success');
         } catch (error) {
           console.error('Error deleting child:', error);
-          alert('Error deleting child. Please try again.');
+          showNotification('Error deleting child. Please try again.', 'error');
         }
       }
     }
@@ -1136,9 +1466,10 @@
       const encodedUri = encodeURI(csvContent);
       const link = document.createElement("a");
       link.setAttribute("href", encodedUri);
-      link.setAttribute("download", "immunization_records.csv");
+      link.setAttribute("download", `immunization_records_${new Date().toISOString().split('T')[0]}.csv`);
       document.body.appendChild(link);
       link.click();
+      showNotification('CSV exported successfully!', 'success');
     }
 
     // Print Records
@@ -1152,7 +1483,8 @@
         const allData = {
           children: await db.children.toArray(),
           vaccinations: await db.vaccinations.toArray(),
-          facility: await db.facility.toArray()
+          facility: await db.facility.toArray(),
+          backupDate: new Date().toISOString()
         };
         
         const data = JSON.stringify(allData, null, 2);
@@ -1160,13 +1492,13 @@
         const url = URL.createObjectURL(blob);
         const link = document.createElement('a');
         link.href = url;
-        link.download = 'immunization_backup.json';
+        link.download = `immunization_backup_${new Date().toISOString().split('T')[0]}.json`;
         link.click();
         URL.revokeObjectURL(url);
-        alert('Backup downloaded successfully!');
+        showNotification('Backup downloaded successfully!', 'success');
       } catch (error) {
         console.error('Error creating backup:', error);
-        alert('Error creating backup. Please try again.');
+        showNotification('Error creating backup. Please try again.', 'error');
       }
     }
 
@@ -1178,6 +1510,14 @@
         reader.onload = async function (event) {
           try {
             const data = JSON.parse(event.target.result);
+            
+            if (!data.children || !data.vaccinations) {
+              throw new Error('Invalid backup file format');
+            }
+            
+            if (!confirm(`This will replace all current data with backup data from ${data.backupDate ? new Date(data.backupDate).toLocaleDateString() : 'unknown date'}. Continue?`)) {
+              return;
+            }
             
             // Clear existing data
             await db.transaction('rw', db.children, db.vaccinations, db.facility, async () => {
@@ -1193,10 +1533,10 @@
             
             // Reload the app
             await initApp();
-            alert('Data restored successfully!');
+            showNotification('Data restored successfully!', 'success');
           } catch (error) {
             console.error('Error restoring data:', error);
-            alert('Invalid backup file. Please upload a valid JSON file.');
+            showNotification('Invalid backup file. Please upload a valid JSON file.', 'error');
           }
         };
         reader.readAsText(file);
@@ -1205,7 +1545,7 @@
 
     // Clear All Data
     async function clearAllData() {
-      if (confirm('Are you sure you want to clear ALL data? This cannot be undone.')) {
+      if (confirm('Are you sure you want to clear ALL data? This cannot be undone and will delete all children and vaccination records.')) {
         try {
           await db.transaction('rw', db.children, db.vaccinations, db.facility, async () => {
             await db.children.clear();
@@ -1215,13 +1555,14 @@
           
           children = [];
           facilityName = '';
+          document.getElementById('facilityName').value = '';
           updateChildTable();
           updateStats();
           updateAllTables();
-          alert('All data has been cleared.');
+          showNotification('All data has been cleared.', 'success');
         } catch (error) {
           console.error('Error clearing data:', error);
-          alert('Error clearing data. Please try again.');
+          showNotification('Error clearing data. Please try again.', 'error');
         }
       }
     }
@@ -1229,6 +1570,43 @@
     // Open Help Modal
     function openHelpModal() {
       document.getElementById('helpModal').style.display = 'flex';
+    }
+
+    // Show Today's Appointments
+    async function showTodayAppointments() {
+      const modal = document.getElementById('todayAppointmentsModal');
+      modal.style.display = 'flex';
+      
+      const today = new Date().toISOString().split('T')[0];
+      const tbody = document.querySelector('#todayAppointmentsTable tbody');
+      tbody.innerHTML = '';
+      
+      let hasAppointments = false;
+      
+      for (const child of children) {
+        const todayVaccinations = child.vaccinations.filter(v => 
+          v.nextVisit && v.nextVisit.split('T')[0] === today
+        );
+        
+        if (todayVaccinations.length > 0) {
+          hasAppointments = true;
+          todayVaccinations.forEach(vaccination => {
+            const row = document.createElement('tr');
+            row.innerHTML = `
+              <td>${child.regNo}</td>
+              <td>${child.name}</td>
+              <td>${vaccination.vaccine}</td>
+              <td>${child.contact || 'N/A'}</td>
+              <td><button onclick="openImmunizationModal(${children.indexOf(child)})">Update</button></td>
+            `;
+            tbody.appendChild(row);
+          });
+        }
+      }
+      
+      if (!hasAppointments) {
+        tbody.innerHTML = '<tr><td colspan="5" style="text-align: center;">No appointments scheduled for today</td></tr>';
+      }
     }
 
     // View All Records
@@ -1249,6 +1627,11 @@
 
       const tbody = document.querySelector('#viewRecordsTable tbody');
       tbody.innerHTML = '';
+
+      if (selectedIndices.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="9" style="text-align: center;">Please select at least one child</td></tr>';
+        return;
+      }
 
       selectedIndices.forEach(index => {
         const child = children[index];
@@ -1324,6 +1707,11 @@
     function updateAllRecordsTable() {
       const tbody = document.querySelector('#allRecordsTable tbody');
       tbody.innerHTML = '';
+
+      if (children.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="7" style="text-align: center;">No children registered</td></tr>';
+        return;
+      }
 
       children.forEach((child, index) => {
         const today = new Date();
@@ -1617,6 +2005,14 @@
       
       // Activate the button for the selected tab
       event.currentTarget.classList.add('active');
+    }
+
+    // Scroll to section
+    function scrollToSection(sectionId) {
+      document.getElementById(sectionId).scrollIntoView({ 
+        behavior: 'smooth',
+        block: 'start'
+      });
     }
 
     // Initialize the app when the page loads
