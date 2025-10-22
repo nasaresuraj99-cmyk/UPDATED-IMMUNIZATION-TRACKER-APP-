@@ -4,454 +4,376 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Immunization Tracker</title>
-  <link rel="stylesheet" href="style.css">
-  <link rel="manifest" href="manifest.json">
-  <link rel="icon" type="image/x-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>💉</text></svg>">
+  
+  <!-- Include Dexie.js for IndexedDB management -->
+  <script src="https://unpkg.com/dexie@3.2.1/dist/dexie.js"></script>
+  
+  <style>
+    /* Ghana Health Service Color Scheme - Preserved Exactly */
+    body {
+      font-family: Arial, sans-serif;
+      margin: 20px;
+      background-color: #f0f8ff; /* Light blue background */
+    }
+
+    h1, h2 {
+      color: #006400; /* Dark green (Ghana Health Service color) */
+    }
+
+    form {
+      margin-bottom: 20px;
+      background-color: #ffffff; /* White */
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+
+    label {
+      display: block;
+      margin-top: 10px;
+      color: #006400; /* Dark green */
+    }
+
+    input, select, button {
+      margin-top: 5px;
+      padding: 8px;
+      width: 100%;
+      max-width: 300px;
+      border: 1px solid #006400; /* Dark green */
+      border-radius: 4px;
+    }
+
+    button {
+      background-color: #006400; /* Dark green */
+      color: #ffffff; /* White */
+      border: none;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background-color: #004d00; /* Darker green */
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+      background-color: #ffffff; /* White */
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+
+    th, td {
+      border: 1px solid #ddd;
+      padding: 8px;
+      text-align: left;
+    }
+
+    th {
+      background-color: #006400; /* Dark green */
+      color: #ffffff; /* White */
+    }
+
+    .highlight-red {
+      background-color: #ffcccc; /* Light red for defaulters */
+    }
+
+    .highlight-pink {
+      background-color: #ffccff; /* Light pink for upcoming visits */
+    }
+
+    .highlight-yellow {
+      background-color: #ffffcc; /* Light yellow for due soon */
+    }
+
+    /* Modal Styles */
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.5);
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+    }
+
+    .modal-content {
+      background-color: white;
+      padding: 20px;
+      border-radius: 8px;
+      width: 80%;
+      max-width: 800px;
+      max-height: 80%;
+      overflow-y: auto;
+    }
+
+    .close {
+      float: right;
+      cursor: pointer;
+      color: #006400; /* Dark green */
+      font-size: 24px;
+      font-weight: bold;
+    }
+
+    /* Footer */
+    footer {
+      margin-top: 20px;
+      text-align: center;
+      color: #006400; /* Dark green */
+    }
+
+    /* Responsive Design */
+    @media (max-width: 600px) {
+      input, select, button {
+        width: 100%;
+      }
+      table {
+        font-size: 12px;
+      }
+    }
+
+    /* Booking Form Styles */
+    .booking-form {
+      margin-top: 20px;
+      border-top: 1px solid #ddd;
+      padding-top: 20px;
+    }
+
+    .vaccine-checkbox {
+      margin-right: 10px;
+    }
+
+    .vaccine-item {
+      margin-bottom: 10px;
+      padding: 8px;
+      border: 1px solid #eee;
+      border-radius: 4px;
+    }
+
+    /* Stats Cards */
+    .stats-container {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 15px;
+      margin-bottom: 20px;
+    }
+
+    .stat-card {
+      background-color: white;
+      border-radius: 8px;
+      padding: 15px;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      flex: 1;
+      min-width: 200px;
+    }
+
+    .stat-card h3 {
+      margin-top: 0;
+      color: #006400;
+    }
+
+    .stat-value {
+      font-size: 24px;
+      font-weight: bold;
+      color: #006400;
+    }
+
+    /* Tabs */
+    .tab-container {
+      margin-bottom: 20px;
+    }
+
+    .tab-buttons {
+      display: flex;
+      margin-bottom: 10px;
+    }
+
+    .tab-button {
+      padding: 10px 15px;
+      background-color: #e0e0e0;
+      border: none;
+      cursor: pointer;
+      margin-right: 5px;
+      border-radius: 4px 4px 0 0;
+    }
+
+    .tab-button.active {
+      background-color: #006400;
+      color: white;
+    }
+
+    .tab-content {
+      display: none;
+      padding: 15px;
+      background-color: white;
+      border-radius: 0 0 4px 4px;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+
+    .tab-content.active {
+      display: block;
+    }
+
+    /* Loading indicator */
+    .loading {
+      display: none;
+      text-align: center;
+      padding: 10px;
+      color: #006400;
+    }
+
+    /* Offline indicator */
+    .offline-indicator {
+      display: none;
+      background-color: #ffcccc;
+      color: #990000;
+      padding: 10px;
+      text-align: center;
+      margin-bottom: 20px;
+      border-radius: 4px;
+    }
+
+    /* Action buttons container */
+    .action-buttons {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 20px;
+    }
+
+    .action-buttons button {
+      flex: 1;
+      min-width: 150px;
+    }
+  </style>
 </head>
 <body>
-  <!-- Login Screen -->
-  <div id="loginScreen" class="screen active">
-    <div class="login-container">
-      <div class="login-header">
-        <h1>🏥 Immunization Tracker</h1>
-        <p>Ghana Health Service</p>
-      </div>
-      
-      <form id="loginForm" class="login-form">
-        <div class="form-group">
-          <label for="facility">Health Facility</label>
-          <select id="facility" required>
-            <option value="">Select Facility</option>
-            <option value="accra_central">Accra Central Hospital</option>
-            <option value="kumasi_metro">Kumasi Metropolitan Hospital</option>
-            <option value="tema_general">Tema General Hospital</option>
-            <option value="takoradi_hospital">Takoradi Hospital</option>
-            <option value="cape_coast">Cape Coast Metropolitan</option>
-            <option value="tamale_teaching">Tamale Teaching Hospital</option>
-            <option value="other">Other Facility</option>
-          </select>
-        </div>
-
-        <div id="customFacilityGroup" class="form-group" style="display: none;">
-          <label for="customFacility">Facility Name</label>
-          <input type="text" id="customFacility" placeholder="Enter your facility name">
-        </div>
-
-        <div class="form-group">
-          <label for="username">Username</label>
-          <input type="text" id="username" required placeholder="Enter your username">
-        </div>
-
-        <div class="form-group">
-          <label for="password">Password</label>
-          <input type="password" id="password" required placeholder="Enter your password">
-        </div>
-
-        <button type="submit" class="login-btn">🔐 Login</button>
-        
-        <div class="login-links">
-          <a href="#" onclick="showForgotPassword()">Forgot Password?</a>
-          <a href="#" onclick="showRegister()">Register New Facility</a>
-        </div>
-      </form>
-    </div>
+  <!-- Offline Indicator -->
+  <div id="offlineIndicator" class="offline-indicator">
+    You are currently offline. The app will work with limited functionality.
   </div>
 
-  <!-- Forgot Password Screen -->
-  <div id="forgotPasswordScreen" class="screen">
-    <div class="login-container">
-      <div class="login-header">
-        <h2>🔑 Reset Password</h2>
-        <p>Enter your details to reset password</p>
+  <h1>Immunization Tracker</h1>
+
+  <!-- Loading Indicator -->
+  <div id="loadingIndicator" class="loading">Loading data...</div>
+
+  <!-- Facility Name Section -->
+  <section id="facility">
+    <h2>Facility Name</h2>
+    <form id="facilityForm">
+      <label for="facilityName">Facility Name:</label>
+      <input type="text" id="facilityName" required>
+      <button type="submit">Save Facility Name</button>
+    </form>
+  </section>
+
+  <!-- Stats Section -->
+  <section id="stats">
+    <h2>Statistics</h2>
+    <div class="stats-container">
+      <div class="stat-card">
+        <h3>Total Children</h3>
+        <div class="stat-value" id="totalChildren">0</div>
+      </div>
+      <div class="stat-card">
+        <h3>Defaulters</h3>
+        <div class="stat-value" id="totalDefaulters">0</div>
+      </div>
+      <div class="stat-card">
+        <h3>Due Soon</h3>
+        <div class="stat-value" id="totalDueSoon">0</div>
+      </div>
+      <div class="stat-card">
+        <h3>Upcoming</h3>
+        <div class="stat-value" id="totalUpcoming">0</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Section 1.0: Registration Form -->
+  <section id="registration">
+    <h2>Register Child</h2>
+    <form id="registrationForm">
+      <label for="childName">Child's Name:</label>
+      <input type="text" id="childName" required>
+
+      <label for="dob">Date of Birth:</label>
+      <input type="date" id="dob" required>
+
+      <label for="sex">Sex:</label>
+      <select id="sex" required>
+        <option value="Male">Male</option>
+        <option value="Female">Female</option>
+      </select>
+
+      <label for="address">Address/Community:</label>
+      <input type="text" id="address" required>
+
+      <label for="contact">Contact (Optional):</label>
+      <input type="text" id="contact">
+
+      <button type="submit">Register</button>
+    </form>
+  </section>
+
+  <!-- Section 1.1: Child Health Register -->
+  <section id="childHealthRegister">
+    <h2>Child Health Register</h2>
+    <input type="text" id="search" placeholder="Search by name or reg no." oninput="filterChildren()">
+    <table id="childTable">
+      <thead>
+        <tr>
+          <th>Reg No.</th>
+          <th>Name</th>
+          <th>DOB</th>
+          <th>Sex</th>
+          <th>Address</th>
+          <th>Contact</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <!-- Rows will be populated dynamically -->
+      </tbody>
+    </table>
+    
+    <div class="action-buttons">
+      <button onclick="exportToCSV()">Export to CSV</button>
+      <button onclick="printRecords()">Print Records</button>
+      <button onclick="backupData()">Backup Data</button>
+      <input type="file" id="restoreFile" accept=".json" style="display: none;">
+      <button onclick="document.getElementById('restoreFile').click()">Restore Data</button>
+      <button onclick="clearAllData()" style="background-color: #ff0000; color: white;">Clear All Data</button>
+      <button onclick="openHelpModal()">Help/Instructions</button>
+    </div>
+  </section>
+
+  <!-- Section 1.2: Dashboard -->
+  <section id="dashboard">
+    <h2>Dashboard</h2>
+    <div class="tab-container">
+      <div class="tab-buttons">
+        <button class="tab-button active" onclick="openTab('allRecords')">All Records</button>
+        <button class="tab-button" onclick="openTab('defaulters')">Defaulters</button>
+        <button class="tab-button" onclick="openTab('dueSoon')">Due Soon (7 days)</button>
+        <button class="tab-button" onclick="openTab('upcoming')">Upcoming (30 days)</button>
       </div>
       
-      <form id="forgotPasswordForm" class="login-form">
-        <div class="form-group">
-          <label for="resetFacility">Health Facility</label>
-          <select id="resetFacility" required>
-            <option value="">Select Facility</option>
-            <option value="accra_central">Accra Central Hospital</option>
-            <option value="kumasi_metro">Kumasi Metropolitan Hospital</option>
-            <option value="tema_general">Tema General Hospital</option>
-            <option value="takoradi_hospital">Takoradi Hospital</option>
-            <option value="cape_coast">Cape Coast Metropolitan</option>
-            <option value="tamale_teaching">Tamale Teaching Hospital</option>
-            <option value="other">Other Facility</option>
-          </select>
-        </div>
-
-        <div class="form-group">
-          <label for="resetUsername">Username</label>
-          <input type="text" id="resetUsername" required placeholder="Enter your username">
-        </div>
-
-        <div class="form-group">
-          <label for="resetEmail">Email Address</label>
-          <input type="email" id="resetEmail" required placeholder="Enter your email">
-        </div>
-
-        <button type="submit" class="login-btn">📧 Send Reset Link</button>
-        
-        <div class="login-links">
-          <a href="#" onclick="showLogin()">Back to Login</a>
-        </div>
-      </form>
-    </div>
-  </div>
-
-  <!-- Register Screen -->
-  <div id="registerScreen" class="screen">
-    <div class="login-container">
-      <div class="login-header">
-        <h2>🏥 Register Facility</h2>
-        <p>Register your health facility</p>
-      </div>
-      
-      <form id="registerForm" class="login-form">
-        <div class="form-group">
-          <label for="newFacilityName">Facility Name</label>
-          <input type="text" id="newFacilityName" required placeholder="Enter facility name">
-        </div>
-
-        <div class="form-group">
-          <label for="newFacilityType">Facility Type</label>
-          <select id="newFacilityType" required>
-            <option value="">Select Type</option>
-            <option value="hospital">Hospital</option>
-            <option value="clinic">Clinic</option>
-            <option value="health_center">Health Center</option>
-            <option value="chps_compound">CHPS Compound</option>
-          </select>
-        </div>
-
-        <div class="form-group">
-          <label for="newFacilityRegion">Region</label>
-          <select id="newFacilityRegion" required>
-            <option value="">Select Region</option>
-            <option value="greater_accra">Greater Accra</option>
-            <option value="ashanti">Ashanti</option>
-            <option value="western">Western</option>
-            <option value="central">Central</option>
-            <option value="eastern">Eastern</option>
-            <option value="volta">Volta</option>
-            <option value="northern">Northern</option>
-            <option value="upper_east">Upper East</option>
-            <option value="upper_west">Upper West</option>
-          </select>
-        </div>
-
-        <div class="form-group">
-          <label for="adminName">Admin Name</label>
-          <input type="text" id="adminName" required placeholder="Enter admin full name">
-        </div>
-
-        <div class="form-group">
-          <label for="adminEmail">Admin Email</label>
-          <input type="email" id="adminEmail" required placeholder="Enter admin email">
-        </div>
-
-        <div class="form-group">
-          <label for="adminUsername">Username</label>
-          <input type="text" id="adminUsername" required placeholder="Choose a username">
-        </div>
-
-        <div class="form-group">
-          <label for="adminPassword">Password</label>
-          <input type="password" id="adminPassword" required placeholder="Choose a password">
-        </div>
-
-        <button type="submit" class="login-btn">📝 Register Facility</button>
-        
-        <div class="login-links">
-          <a href="#" onclick="showLogin()">Back to Login</a>
-        </div>
-      </form>
-    </div>
-  </div>
-
-  <!-- Main App Screen -->
-  <div id="appScreen" class="screen">
-    <!-- Header -->
-    <header class="app-header">
-      <div class="header-content">
-        <div class="facility-info">
-          <h1>🏥 Immunization Tracker</h1>
-          <span id="currentFacility" class="facility-name"></span>
-        </div>
-        <div class="user-actions">
-          <span id="currentUser" class="user-name"></span>
-          <button onclick="logout()" class="logout-btn">🚪 Logout</button>
-        </div>
-      </div>
-    </header>
-
-    <!-- Offline Indicator -->
-    <div id="offlineIndicator" class="offline-indicator">
-      ⚠️ You are currently offline. The app will work with limited functionality.
-    </div>
-
-    <!-- Notification Area -->
-    <div id="notificationArea"></div>
-
-    <!-- Loading Indicator -->
-    <div id="loadingIndicator" class="loading">
-      <div class="spinner"></div>
-      <p>Loading data...</p>
-    </div>
-
-    <!-- Quick Actions -->
-    <div class="quick-actions">
-      <button onclick="scrollToSection('registration')">➕ Register Child</button>
-      <button onclick="scrollToSection('childHealthRegister')">📋 View Register</button>
-      <button onclick="scrollToSection('dashboard')">📊 View Dashboard</button>
-      <button onclick="showTodayAppointments()">📅 Today's Appointments</button>
-    </div>
-
-    <!-- Facility Name Section -->
-    <section id="facility">
-      <h2>🏛️ Facility Information</h2>
-      <form id="facilityForm">
-        <label for="facilityName">Facility Name:</label>
-        <input type="text" id="facilityName" required>
-        <button type="submit">💾 Save Facility Name</button>
-      </form>
-    </section>
-
-    <!-- Stats Section -->
-    <section id="stats">
-      <h2>📈 Statistics</h2>
-      <div class="stats-container">
-        <div class="stat-card">
-          <h3>Total Children</h3>
-          <div class="stat-value" id="totalChildren">0</div>
-        </div>
-        <div class="stat-card">
-          <h3>Defaulters</h3>
-          <div class="stat-value" id="totalDefaulters">0</div>
-        </div>
-        <div class="stat-card">
-          <h3>Due Soon</h3>
-          <div class="stat-value" id="totalDueSoon">0</div>
-        </div>
-        <div class="stat-card">
-          <h3>Upcoming</h3>
-          <div class="stat-value" id="totalUpcoming">0</div>
-        </div>
-      </div>
-    </section>
-
-    <!-- Section 1.0: Registration Form -->
-    <section id="registration">
-      <h2>👶 Register Child</h2>
-      <form id="registrationForm">
-        <label for="childName">Child's Name:</label>
-        <input type="text" id="childName" required>
-
-        <label for="dob">Date of Birth:</label>
-        <input type="date" id="dob" required>
-
-        <label for="sex">Sex:</label>
-        <select id="sex" required>
-          <option value="Male">Male</option>
-          <option value="Female">Female</option>
-        </select>
-
-        <label for="address">Address/Community:</label>
-        <input type="text" id="address" required>
-
-        <label for="contact">Contact (Optional):</label>
-        <input type="text" id="contact">
-
-        <button type="submit">✅ Register Child</button>
-      </form>
-    </section>
-
-    <!-- Section 1.1: Child Health Register -->
-    <section id="childHealthRegister">
-      <h2>📋 Child Health Register</h2>
-      <div class="search-container">
-        <input type="text" id="search" placeholder="🔍 Search by name or registration number..." oninput="filterChildren()">
-      </div>
-      <table id="childTable">
-        <thead>
-          <tr>
-            <th>Reg No.</th>
-            <th>Name</th>
-            <th>DOB</th>
-            <th>Sex</th>
-            <th>Address</th>
-            <th>Contact</th>
-            <th>Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          <!-- Rows will be populated dynamically -->
-        </tbody>
-      </table>
-      
-      <div class="action-buttons">
-        <button onclick="exportToCSV()">📤 Export to CSV</button>
-        <button onclick="printRecords()">🖨️ Print Records</button>
-        <button onclick="backupData()">💾 Backup Data</button>
-        <input type="file" id="restoreFile" accept=".json" style="display: none;">
-        <button onclick="document.getElementById('restoreFile').click()">📥 Restore Data</button>
-        <button onclick="clearAllData()" class="danger">🗑️ Clear All Data</button>
-        <button onclick="openHelpModal()">❓ Help/Instructions</button>
-      </div>
-    </section>
-
-    <!-- Section 1.2: Dashboard -->
-    <section id="dashboard">
-      <h2>📊 Dashboard</h2>
-      <div class="tab-container">
-        <div class="tab-buttons">
-          <button class="tab-button active" onclick="openTab('allRecords')">All Records</button>
-          <button class="tab-button" onclick="openTab('defaulters')">Defaulters</button>
-          <button class="tab-button" onclick="openTab('dueSoon')">Due Soon (7 days)</button>
-          <button class="tab-button" onclick="openTab('upcoming')">Upcoming (30 days)</button>
-        </div>
-        
-        <div id="allRecords" class="tab-content active">
-          <table id="allRecordsTable">
-            <thead>
-              <tr>
-                <th>Reg No.</th>
-                <th>Name</th>
-                <th>Completed Vaccines</th>
-                <th>Booked Vaccines</th>
-                <th>Next Visit Date</th>
-                <th>Status</th>
-                <th>Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              <!-- Rows will be populated dynamically -->
-            </tbody>
-          </table>
-        </div>
-        
-        <div id="defaulters" class="tab-content">
-          <table id="defaultersTable">
-            <thead>
-              <tr>
-                <th>Reg No.</th>
-                <th>Name</th>
-                <th>Missed Vaccine</th>
-                <th>Missed Date</th>
-                <th>Days Overdue</th>
-                <th>Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              <!-- Rows will be populated dynamically -->
-            </tbody>
-          </table>
-        </div>
-        
-        <div id="dueSoon" class="tab-content">
-          <table id="dueSoonTable">
-            <thead>
-              <tr>
-                <th>Reg No.</th>
-                <th>Name</th>
-                <th>Due Vaccine</th>
-                <th>Due Date</th>
-                <th>Days Remaining</th>
-                <th>Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              <!-- Rows will be populated dynamically -->
-            </tbody>
-          </table>
-        </div>
-        
-        <div id="upcoming" class="tab-content">
-          <table id="upcomingTable">
-            <thead>
-              <tr>
-                <th>Reg No.</th>
-                <th>Name</th>
-                <th>Scheduled Vaccine</th>
-                <th>Scheduled Date</th>
-                <th>Days Remaining</th>
-                <th>Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              <!-- Rows will be populated dynamically -->
-            </tbody>
-          </table>
-        </div>
-      </div>
-    </section>
-
-    <!-- All Modals Here -->
-    <!-- Immunization Modal -->
-    <div id="immunizationModal" class="modal">
-      <div class="modal-content">
-        <span class="close" onclick="closeModal()">&times;</span>
-        <h2>💉 Immunization Schedule</h2>
-        <table id="immunizationTable">
-          <thead>
-            <tr>
-              <th>Vaccine</th>
-              <th>Date Given</th>
-              <th>Batch Number</th>
-              <th>Place Given</th>
-              <th>Remarks</th>
-              <th>Next Visit</th>
-            </tr>
-          </thead>
-          <tbody>
-            <!-- Rows will be populated dynamically -->
-          </tbody>
-        </table>
-        <button onclick="promptToBookNextVisit()">💾 Save</button>
-      </div>
-    </div>
-
-    <!-- Booking Modal -->
-    <div id="bookingModal" class="modal">
-      <div class="modal-content">
-        <span class="close" onclick="closeBookingModal()">&times;</span>
-        <h2>📅 Book Next Visit</h2>
-        <div class="booking-form">
-          <h3>Select Vaccines for Next Visit:</h3>
-          <div id="vaccineSelection">
-            <!-- Vaccine checkboxes will be populated dynamically -->
-          </div>
-          <label for="nextVisitDate">Next Visit Date:</label>
-          <input type="date" id="nextVisitDate" required>
-          <button onclick="saveBooking()">✅ Confirm Booking</button>
-        </div>
-      </div>
-    </div>
-
-    <!-- View Records Modal -->
-    <div id="viewRecordsModal" class="modal">
-      <div class="modal-content">
-        <span class="close" onclick="closeViewRecordsModal()">&times;</span>
-        <h2>📋 View Immunization Records</h2>
-        <div>
-          <label for="selectChildren">Select Child(ren):</label>
-          <select id="selectChildren" multiple>
-            <!-- Options will be populated dynamically -->
-          </select>
-          <button onclick="viewSelectedChildrenRecords()">👁️ View Records</button>
-        </div>
-        <table id="viewRecordsTable">
+      <div id="allRecords" class="tab-content active">
+        <table id="allRecordsTable">
           <thead>
             <tr>
               <th>Reg No.</th>
               <th>Name</th>
-              <th>Vaccine</th>
-              <th>Date Given</th>
-              <th>Batch Number</th>
-              <th>Place Given</th>
-              <th>Remarks</th>
-              <th>Next Visit</th>
+              <th>Completed Vaccines</th>
+              <th>Booked Vaccines</th>
+              <th>Next Visit Date</th>
               <th>Status</th>
+              <th>Actions</th>
             </tr>
           </thead>
           <tbody>
@@ -459,49 +381,52 @@
           </tbody>
         </table>
       </div>
-    </div>
-
-    <!-- Edit Child Modal -->
-    <div id="editChildModal" class="modal">
-      <div class="modal-content">
-        <span class="close" onclick="closeEditChildModal()">&times;</span>
-        <h2>✏️ Edit Child Details</h2>
-        <form id="editChildForm">
-          <label for="editChildName">Child's Name:</label>
-          <input type="text" id="editChildName" required>
-
-          <label for="editDob">Date of Birth:</label>
-          <input type="date" id="editDob" required>
-
-          <label for="editSex">Sex:</label>
-          <select id="editSex" required>
-            <option value="Male">Male</option>
-            <option value="Female">Female</option>
-          </select>
-
-          <label for="editAddress">Address/Community:</label>
-          <input type="text" id="editAddress" required>
-
-          <label for="editContact">Contact (Optional):</label>
-          <input type="text" id="editContact">
-
-          <button type="button" onclick="saveEditedChild()">💾 Save Changes</button>
-        </form>
+      
+      <div id="defaulters" class="tab-content">
+        <table id="defaultersTable">
+          <thead>
+            <tr>
+              <th>Reg No.</th>
+              <th>Name</th>
+              <th>Missed Vaccine</th>
+              <th>Missed Date</th>
+              <th>Days Overdue</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <!-- Rows will be populated dynamically -->
+          </tbody>
+        </table>
       </div>
-    </div>
-
-    <!-- Today's Appointments Modal -->
-    <div id="todayAppointmentsModal" class="modal">
-      <div class="modal-content">
-        <span class="close" onclick="closeTodayAppointmentsModal()">&times;</span>
-        <h2>📅 Today's Appointments</h2>
-        <table id="todayAppointmentsTable">
+      
+      <div id="dueSoon" class="tab-content">
+        <table id="dueSoonTable">
+          <thead>
+            <tr>
+              <th>Reg No.</th>
+              <th>Name</th>
+              <th>Due Vaccine</th>
+              <th>Due Date</th>
+              <th>Days Remaining</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <!-- Rows will be populated dynamically -->
+          </tbody>
+        </table>
+      </div>
+      
+      <div id="upcoming" class="tab-content">
+        <table id="upcomingTable">
           <thead>
             <tr>
               <th>Reg No.</th>
               <th>Name</th>
               <th>Scheduled Vaccine</th>
-              <th>Contact</th>
+              <th>Scheduled Date</th>
+              <th>Days Remaining</th>
               <th>Actions</th>
             </tr>
           </thead>
@@ -511,43 +436,1191 @@
         </table>
       </div>
     </div>
+  </section>
 
-    <!-- Help Modal -->
-    <div id="helpModal" class="modal">
-      <div class="modal-content">
-        <span class="close" onclick="closeHelpModal()">&times;</span>
-        <h2>❓ Help/Instructions</h2>
-        <div style="max-height: 60vh; overflow-y: auto;">
-          <h3>Getting Started</h3>
-          <p>1. Register a child using the registration form.</p>
-          <p>2. Update immunization records by clicking "Update" next to a child's name.</p>
-          <p>3. Use the dashboard tabs to view defaulters, due soon, or all records.</p>
-          
-          <h3>Data Management</h3>
-          <p>4. Export data to CSV or print records for offline use.</p>
-          <p>5. Backup and restore data using the respective buttons.</p>
-          <p>6. Clear all data if needed (use with caution).</p>
-          
-          <h3>Vaccination Workflow</h3>
-          <p>7. When saving immunization records, you'll be prompted to book the next visit.</p>
-          <p>8. Select vaccines for the next visit and set the date in the booking form.</p>
-          <p>9. Use the "Today's Appointments" button to quickly view today's scheduled visits.</p>
-          
-          <h3>Tips</h3>
-          <p>• Use the search function to quickly find children in the register.</p>
-          <p>• The app works completely offline - no internet connection required.</p>
-          <p>• Data is automatically saved as you work.</p>
-          <p>• Use the quick action buttons at the top for easy navigation.</p>
-        </div>
-      </div>
+  <!-- Modal for Immunization Schedule -->
+  <div id="immunizationModal" class="modal">
+    <div class="modal-content">
+      <span class="close" onclick="closeModal()">&times;</span>
+      <h2>Immunization Schedule</h2>
+      <table id="immunizationTable">
+        <thead>
+          <tr>
+            <th>Vaccine</th>
+            <th>Date Given</th>
+            <th>Batch Number</th>
+            <th>Place Given</th>
+            <th>Remarks</th>
+            <th>Next Visit</th>
+          </tr>
+        </thead>
+        <tbody>
+          <!-- Rows will be populated dynamically -->
+        </tbody>
+      </table>
+      <button onclick="promptToBookNextVisit()">Save</button>
     </div>
-
-    <!-- Footer -->
-    <footer>
-      Developed By NASARE SURAJ | Immunization Tracker v3.0 | Ghana Health Service
-    </footer>
   </div>
 
-  <script src="app.js"></script>
+  <!-- Modal for Booking Next Visit -->
+  <div id="bookingModal" class="modal">
+    <div class="modal-content">
+      <span class="close" onclick="closeBookingModal()">&times;</span>
+      <h2>Book Next Visit</h2>
+      <div class="booking-form">
+        <h3>Select Vaccines for Next Visit:</h3>
+        <div id="vaccineSelection">
+          <!-- Vaccine checkboxes will be populated dynamically -->
+        </div>
+        <label for="nextVisitDate">Next Visit Date:</label>
+        <input type="date" id="nextVisitDate" required>
+        <button onclick="saveBooking()">Confirm Booking</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal for Viewing Records -->
+  <div id="viewRecordsModal" class="modal">
+    <div class="modal-content">
+      <span class="close" onclick="closeViewRecordsModal()">&times;</span>
+      <h2>View Immunization Records</h2>
+      <div>
+        <label for="selectChildren">Select Child(ren):</label>
+        <select id="selectChildren" multiple>
+          <!-- Options will be populated dynamically -->
+        </select>
+        <button onclick="viewSelectedChildrenRecords()">View Records</button>
+      </div>
+      <table id="viewRecordsTable">
+        <thead>
+          <tr>
+            <th>Reg No.</th>
+            <th>Name</th>
+            <th>Vaccine</th>
+            <th>Date Given</th>
+            <th>Batch Number</th>
+            <th>Place Given</th>
+            <th>Remarks</th>
+            <th>Next Visit</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          <!-- Rows will be populated dynamically -->
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Modal for Editing Child Details -->
+  <div id="editChildModal" class="modal">
+    <div class="modal-content">
+      <span class="close" onclick="closeEditChildModal()">&times;</span>
+      <h2>Edit Child Details</h2>
+      <form id="editChildForm">
+        <label for="editChildName">Child's Name:</label>
+        <input type="text" id="editChildName" required>
+
+        <label for="editDob">Date of Birth:</label>
+        <input type="date" id="editDob" required>
+
+        <label for="editSex">Sex:</label>
+        <select id="editSex" required>
+          <option value="Male">Male</option>
+          <option value="Female">Female</option>
+        </select>
+
+        <label for="editAddress">Address/Community:</label>
+        <input type="text" id="editAddress" required>
+
+        <label for="editContact">Contact (Optional):</label>
+        <input type="text" id="editContact">
+
+        <button type="button" onclick="saveEditedChild()">Save Changes</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal for Help/Instructions -->
+  <div id="helpModal" class="modal">
+    <div class="modal-content">
+      <span class="close" onclick="closeHelpModal()">&times;</span>
+      <h2>Help/Instructions</h2>
+      <p>1. Register a child using the registration form.</p>
+      <p>2. Update immunization records by clicking "Update" next to a child's name.</p>
+      <p>3. Use the dashboard tabs to view defaulters, due soon, or all records.</p>
+      <p>4. Export data to CSV or print records for offline use.</p>
+      <p>5. Backup and restore data using the respective buttons.</p>
+      <p>6. Clear all data if needed (use with caution).</p>
+      <p>7. When saving immunization records, you'll be prompted to book the next visit.</p>
+      <p>8. Select vaccines for the next visit and set the date in the booking form.</p>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer>
+    Developed By NASARE SURAJ
+  </footer>
+
+  <script>
+    // Initialize Dexie database
+    const db = new Dexie('ImmunizationTrackerDB');
+    db.version(1).stores({
+      children: '++id, regNo, name, dob, sex, address, contact, isDefaulter',
+      vaccinations: '++id, childId, vaccine, dateGiven, batchNumber, placeGiven, remarks, nextVisit',
+      facility: 'id, name'
+    });
+
+    // Global variables
+    let children = [];
+    let facilityName = '';
+    let unsavedVaccinations = {};
+    let selectedChildIndex = null;
+    let editChildIndex = null;
+
+    // Initialize the application
+    async function initApp() {
+      showLoading(true);
+      
+      try {
+        // Load facility name
+        const facility = await db.facility.get(1);
+        if (facility) {
+          facilityName = facility.name;
+          document.getElementById('facilityName').value = facilityName;
+        }
+        
+        // Load children data
+        children = await db.children.toArray();
+        
+        // Load vaccinations for each child
+        for (let child of children) {
+          child.vaccinations = await db.vaccinations.where('childId').equals(child.id).toArray();
+        }
+        
+        // Update UI
+        updateStats();
+        updateChildTable();
+        updateAllTables();
+      } catch (error) {
+        console.error('Error initializing app:', error);
+        alert('Error loading data. Please refresh the page.');
+      } finally {
+        showLoading(false);
+      }
+    }
+
+    // Show/hide loading indicator
+    function showLoading(show) {
+      document.getElementById('loadingIndicator').style.display = show ? 'block' : 'none';
+    }
+
+    // Check online/offline status
+    window.addEventListener('online', updateOnlineStatus);
+    window.addEventListener('offline', updateOnlineStatus);
+    
+    function updateOnlineStatus() {
+      const offlineIndicator = document.getElementById('offlineIndicator');
+      offlineIndicator.style.display = navigator.onLine ? 'none' : 'block';
+    }
+    
+    // Initialize online status
+    updateOnlineStatus();
+
+    // Save Facility Name
+    document.getElementById('facilityForm').addEventListener('submit', async function (e) {
+      e.preventDefault();
+      facilityName = document.getElementById('facilityName').value;
+      
+      try {
+        await db.facility.put({ id: 1, name: facilityName });
+        alert('Facility name saved successfully!');
+      } catch (error) {
+        console.error('Error saving facility name:', error);
+        alert('Error saving facility name. Please try again.');
+      }
+    });
+
+    // Vaccination Schedule
+    const vaccinationSchedule = [
+      "BCG at Birth",
+      "OPV0 at Birth",
+      "Hepatitis B at Birth",
+      "OPV1 at 6 weeks",
+      "Penta1 at 6 weeks",
+      "PCV1 at 6 weeks",
+      "Rotavirus1 at 6 weeks",
+      "OPV2 at 10 weeks",
+      "Penta2 at 10 weeks",
+      "PCV2 at 10 weeks",
+      "Rotavirus2 at 10 weeks",
+      "OPV3 at 14 weeks",
+      "Penta3 at 14 weeks",
+      "PCV3 at 14 weeks",
+      "Rotavirus3 at 14 weeks",
+      "IPV1 at 14 weeks",
+      "Malaria1 at 6 months",
+      "Malaria2 at 7 months",
+      "IPV2 at 7 months",
+      "Malaria3 at 9 months",
+      "Measles Rubella1 at 9 months",
+      "Malaria4 at 18 months",
+      "Measles Rubella2 at 18 months",
+      "Men A at 18 months",
+      "Vitamin A at 6 months",
+      "Vitamin A at 12 months",
+      "Vitamin A at 18 months",
+      "Vitamin A at 24 months",
+      "Vitamin A at 30 months",
+      "Vitamin A at 36 months",
+      "Vitamin A at 42 months",
+      "Vitamin A at 48 months",
+      "Vitamin A at 54 months",
+      "Vitamin A at 60 months"
+    ];
+
+    // Generate unique registration number
+    function generateRegNo() {
+      const year = new Date().getFullYear();
+      let count = children.filter(child => child.regNo.startsWith(year)).length + 1;
+      let regNo = `${String(count).padStart(3, '0')}/${year}`;
+
+      // Ensure the registration number is unique
+      while (children.some(child => child.regNo === regNo)) {
+        count++;
+        regNo = `${String(count).padStart(3, '0')}/${year}`;
+      }
+
+      return regNo;
+    }
+
+    // Register child
+    document.getElementById('registrationForm').addEventListener('submit', async function (e) {
+      e.preventDefault();
+
+      const childName = document.getElementById('childName').value.trim();
+      const dob = document.getElementById('dob').value;
+      const today = new Date();
+
+      // Check if child already exists
+      if (children.some(child => child.name.toLowerCase() === childName.toLowerCase())) {
+        alert('Child already registered.');
+        return;
+      }
+
+      if (new Date(dob) > today) {
+        alert('Date of Birth cannot be in the future.');
+        return;
+      }
+
+      try {
+        const childId = await db.children.add({
+          regNo: generateRegNo(),
+          name: childName,
+          dob: dob,
+          sex: document.getElementById('sex').value,
+          address: document.getElementById('address').value,
+          contact: document.getElementById('contact').value,
+          isDefaulter: false
+        });
+
+        // Add the new child to the local array
+        const newChild = {
+          id: childId,
+          regNo: generateRegNo(),
+          name: childName,
+          dob: dob,
+          sex: document.getElementById('sex').value,
+          address: document.getElementById('address').value,
+          contact: document.getElementById('contact').value,
+          isDefaulter: false,
+          vaccinations: []
+        };
+        
+        children.push(newChild);
+        
+        updateChildTable();
+        updateStats();
+        this.reset();
+        alert('You have successfully registered a new child!');
+      } catch (error) {
+        console.error('Error registering child:', error);
+        alert('Error registering child. Please try again.');
+      }
+    });
+
+    // Update Child Table
+    function updateChildTable(filteredChildren = children) {
+      const tbody = document.querySelector('#childTable tbody');
+      tbody.innerHTML = '';
+
+      filteredChildren.forEach((child, index) => {
+        const row = document.createElement('tr');
+        row.innerHTML = `
+          <td>${child.regNo}</td>
+          <td>${child.name}</td>
+          <td>${formatDate(child.dob)}</td>
+          <td>${child.sex}</td>
+          <td>${child.address}</td>
+          <td>${child.contact || 'N/A'}</td>
+          <td>
+            <button onclick="openImmunizationModal(${index})">Update</button>
+            <button onclick="openEditChildModal(${index})">Edit</button>
+            <button onclick="deleteChild(${index})">Delete</button>
+          </td>
+        `;
+        tbody.appendChild(row);
+      });
+    }
+
+    // Open Edit Child Modal
+    function openEditChildModal(index) {
+      editChildIndex = index;
+      const modal = document.getElementById('editChildModal');
+      modal.style.display = 'flex';
+
+      const child = children[index];
+      document.getElementById('editChildName').value = child.name;
+      document.getElementById('editDob').value = child.dob;
+      document.getElementById('editSex').value = child.sex;
+      document.getElementById('editAddress').value = child.address;
+      document.getElementById('editContact').value = child.contact || '';
+    }
+
+    // Save Edited Child Details and close modal
+    async function saveEditedChild() {
+      const child = children[editChildIndex];
+      child.name = document.getElementById('editChildName').value.trim();
+      child.dob = document.getElementById('editDob').value;
+      child.sex = document.getElementById('editSex').value;
+      child.address = document.getElementById('editAddress').value.trim();
+      child.contact = document.getElementById('editContact').value.trim();
+
+      try {
+        await db.children.update(child.id, {
+          name: child.name,
+          dob: child.dob,
+          sex: child.sex,
+          address: child.address,
+          contact: child.contact
+        });
+        
+        updateChildTable();
+        updateViewRecordsModal();
+        closeEditChildModal();
+        alert('Child details updated successfully!');
+      } catch (error) {
+        console.error('Error updating child:', error);
+        alert('Error updating child details. Please try again.');
+      }
+    }
+
+    // Close Edit Child Modal
+    function closeEditChildModal() {
+      document.getElementById('editChildModal').style.display = 'none';
+    }
+
+    // Open Immunization Modal
+    function openImmunizationModal(index) {
+      selectedChildIndex = index;
+      const modal = document.getElementById('immunizationModal');
+      modal.style.display = 'flex';
+
+      const tbody = document.querySelector('#immunizationTable tbody');
+      tbody.innerHTML = '';
+
+      const child = children[index];
+      const childKey = `${child.regNo}-${child.name}`;
+      unsavedVaccinations[childKey] = unsavedVaccinations[childKey] || {};
+
+      vaccinationSchedule.forEach(vaccine => {
+        const existingVaccine = child.vaccinations.find(v => v.vaccine === vaccine);
+        const unsavedDate = unsavedVaccinations[childKey][vaccine];
+
+        const row = document.createElement('tr');
+        row.innerHTML = `
+          <td>${vaccine}</td>
+          <td><input type="date" class="dateGiven" value="${unsavedDate || existingVaccine?.dateGiven || ''}" onchange="trackUnsavedDate(this, '${childKey}', '${vaccine}')"></td>
+          <td><input type="text" class="batchNumber" value="${existingVaccine?.batchNumber || ''}" required></td>
+          <td><input type="text" class="placeGiven" value="${existingVaccine?.placeGiven || ''}" required></td>
+          <td><input type="text" class="remarks" value="${existingVaccine?.remarks || ''}" required></td>
+          <td>${formatDate(existingVaccine?.nextVisit) || 'N/A'}</td>
+        `;
+        tbody.appendChild(row);
+      });
+    }
+
+    // Track unsaved dates
+    function trackUnsavedDate(input, childKey, vaccine) {
+      if (!unsavedVaccinations[childKey]) {
+        unsavedVaccinations[childKey] = {};
+      }
+      unsavedVaccinations[childKey][vaccine] = input.value;
+    }
+
+    // Prompt to book next visit
+    function promptToBookNextVisit() {
+      const confirmation = confirm('Do you want to book the next visit for this child?');
+      if (confirmation) {
+        openBookingModal();
+      } else {
+        saveImmunization(false); // Save without booking next visit
+      }
+    }
+
+    // Open Booking Modal
+    function openBookingModal() {
+      const modal = document.getElementById('bookingModal');
+      modal.style.display = 'flex';
+
+      const child = children[selectedChildIndex];
+      const childKey = `${child.regNo}-${child.name}`;
+      const vaccineSelection = document.getElementById('vaccineSelection');
+      vaccineSelection.innerHTML = '';
+
+      // Get vaccines that haven't been given yet (including checking unsaved dates)
+      const givenVaccines = child.vaccinations
+        .filter(v => v.dateGiven)
+        .map(v => v.vaccine);
+      
+      // Also exclude vaccines with unsaved dates
+      const unsavedDates = unsavedVaccinations[childKey] || {};
+      const vaccinesWithUnsavedDates = Object.keys(unsavedDates).filter(v => unsavedDates[v]);
+      
+      // Get booked vaccines
+      const bookedVaccines = child.vaccinations
+        .filter(v => v.nextVisit && !v.dateGiven)
+        .map(v => v.vaccine);
+      
+      // Available vaccines are those not given, not booked, and not having unsaved dates
+      const availableVaccines = vaccinationSchedule.filter(v => 
+        !givenVaccines.includes(v) && 
+        !bookedVaccines.includes(v) &&
+        !vaccinesWithUnsavedDates.includes(v)
+      );
+
+      if (availableVaccines.length === 0) {
+        vaccineSelection.innerHTML = '<p>No vaccines available for booking.</p>';
+        document.getElementById('nextVisitDate').disabled = true;
+      } else {
+        availableVaccines.forEach(vaccine => {
+          const vaccineItem = document.createElement('div');
+          vaccineItem.className = 'vaccine-item';
+          vaccineItem.innerHTML = `
+            <input type="checkbox" class="vaccine-checkbox" id="vaccine-${vaccine}" value="${vaccine}">
+            <label for="vaccine-${vaccine}">${vaccine}</label>
+          `;
+          vaccineSelection.appendChild(vaccineItem);
+        });
+        document.getElementById('nextVisitDate').disabled = false;
+      }
+    }
+
+    // Close Booking Modal
+    function closeBookingModal() {
+      const modal = document.getElementById('bookingModal');
+      modal.style.display = 'none';
+    }
+
+    // Save Booking
+    function saveBooking() {
+      const nextVisitDate = document.getElementById('nextVisitDate').value;
+      if (!nextVisitDate) {
+        alert('Please select a next visit date.');
+        return;
+      }
+
+      const checkboxes = document.querySelectorAll('.vaccine-checkbox:checked');
+      if (checkboxes.length === 0) {
+        alert('Please select at least one vaccine for the next visit.');
+        return;
+      }
+
+      // First save the immunization data without next visit dates
+      saveImmunization(true, nextVisitDate, Array.from(checkboxes).map(cb => cb.value));
+    }
+
+    // Save Immunization Data
+    async function saveImmunization(bookNextVisit = false, nextVisitDate = null, nextVisitVaccines = []) {
+      const child = children[selectedChildIndex];
+      const childKey = `${child.regNo}-${child.name}`;
+      const rows = document.querySelectorAll('#immunizationTable tbody tr');
+
+      // Validate mandatory fields
+      let isValid = true;
+      rows.forEach(row => {
+        const dateGiven = row.querySelector('.dateGiven').value;
+        const batchNumber = row.querySelector('.batchNumber').value;
+        const placeGiven = row.querySelector('.placeGiven').value;
+        const remarks = row.querySelector('.remarks').value;
+
+        if (dateGiven && (!batchNumber || !placeGiven || !remarks)) {
+          isValid = false;
+          alert('Batch Number, Place Given, and Remarks are mandatory when Date Given is selected.');
+        }
+      });
+
+      if (!isValid) return;
+
+      try {
+        // Delete existing vaccinations for this child
+        await db.vaccinations.where('childId').equals(child.id).delete();
+        
+        // Save all vaccination data
+        const vaccinationPromises = [];
+        rows.forEach(row => {
+          const vaccine = row.cells[0].textContent;
+          const dateGiven = row.querySelector('.dateGiven').value;
+          const batchNumber = row.querySelector('.batchNumber').value;
+          const placeGiven = row.querySelector('.placeGiven').value;
+          const remarks = row.querySelector('.remarks').value;
+
+          if (dateGiven || batchNumber || placeGiven || remarks) {
+            vaccinationPromises.push(
+              db.vaccinations.add({
+                childId: child.id,
+                vaccine,
+                dateGiven,
+                batchNumber,
+                placeGiven,
+                remarks,
+                nextVisit: '' // We'll handle next visits separately
+              })
+            );
+          }
+        });
+
+        // If booking next visit, add next visit dates to selected vaccines
+        if (bookNextVisit && nextVisitDate && nextVisitVaccines.length > 0) {
+          nextVisitVaccines.forEach(vaccine => {
+            vaccinationPromises.push(
+              db.vaccinations.add({
+                childId: child.id,
+                vaccine,
+                dateGiven: '',
+                batchNumber: '',
+                placeGiven: '',
+                remarks: '',
+                nextVisit: nextVisitDate
+              })
+            );
+          });
+        }
+
+        await Promise.all(vaccinationPromises);
+        
+        // Update the local child data
+        child.vaccinations = await db.vaccinations.where('childId').equals(child.id).toArray();
+
+        // Clear unsaved dates for this child
+        if (unsavedVaccinations[childKey]) {
+          delete unsavedVaccinations[childKey];
+        }
+
+        // Update defaulter status based on next visit dates
+        updateDefaulterStatus(child);
+        
+        // Update child defaulter status in database
+        await db.children.update(child.id, { isDefaulter: child.isDefaulter });
+        
+        closeModal();
+        closeBookingModal();
+        updateChildTable();
+        updateStats();
+        updateAllTables();
+        alert('Immunization data saved successfully!');
+      } catch (error) {
+        console.error('Error saving immunization data:', error);
+        alert('Error saving immunization data. Please try again.');
+      }
+    }
+
+    // Update Defaulter Status
+    function updateDefaulterStatus(child) {
+      const today = new Date();
+      child.isDefaulter = child.vaccinations.some(vaccination => {
+        if (!vaccination.nextVisit) return false;
+        const nextVisitDate = new Date(vaccination.nextVisit);
+        return nextVisitDate < today;
+      });
+    }
+
+    // Close Modal
+    function closeModal() {
+      const modal = document.getElementById('immunizationModal');
+      modal.style.display = 'none';
+    }
+
+    // Close View Records Modal
+    function closeViewRecordsModal() {
+      const modal = document.getElementById('viewRecordsModal');
+      modal.style.display = 'none';
+    }
+
+    // Close Help Modal
+    function closeHelpModal() {
+      const modal = document.getElementById('helpModal');
+      modal.style.display = 'none';
+    }
+
+    // Delete Child
+    async function deleteChild(index) {
+      if (confirm('Are you sure you want to delete this child?')) {
+        const child = children[index];
+        
+        try {
+          // Delete child and associated vaccinations
+          await db.transaction('rw', db.children, db.vaccinations, async () => {
+            await db.vaccinations.where('childId').equals(child.id).delete();
+            await db.children.delete(child.id);
+          });
+          
+          children.splice(index, 1);
+          updateChildTable();
+          updateViewRecordsModal();
+          updateStats();
+          updateAllTables();
+        } catch (error) {
+          console.error('Error deleting child:', error);
+          alert('Error deleting child. Please try again.');
+        }
+      }
+    }
+
+    // Filter Children
+    function filterChildren() {
+      const searchTerm = document.getElementById('search').value.toLowerCase();
+      const filteredChildren = children.filter(child =>
+        child.name.toLowerCase().includes(searchTerm) || child.regNo.includes(searchTerm)
+      );
+      updateChildTable(filteredChildren);
+    }
+
+    // Export to CSV
+    function exportToCSV() {
+      const headers = ["Reg No.", "Name", "Vaccine", "Date Given", "Next Visit", "Status"];
+      const data = [];
+
+      // Add all vaccination records to CSV
+      children.forEach(child => {
+        child.vaccinations.forEach(vaccination => {
+          const today = new Date();
+          let status = 'Upcoming';
+          
+          if (vaccination.dateGiven) {
+            status = 'Completed';
+          } else if (vaccination.nextVisit) {
+            const nextVisitDate = new Date(vaccination.nextVisit);
+            if (nextVisitDate < today) {
+              const daysOverdue = Math.floor((today - nextVisitDate) / (1000 * 60 * 60 * 24));
+              status = `Overdue (${daysOverdue} days)`;
+            } else {
+              const daysUntil = Math.ceil((nextVisitDate - today) / (1000 * 60 * 60 * 24));
+              status = `Due in ${daysUntil} days`;
+            }
+          }
+
+          data.push([
+            child.regNo,
+            child.name,
+            vaccination.vaccine,
+            formatDate(vaccination.dateGiven) || 'N/A',
+            formatDate(vaccination.nextVisit) || 'N/A',
+            status
+          ]);
+        });
+      });
+
+      const csvContent = "data:text/csv;charset=utf-8," +
+        [headers, ...data].map(row => row.join(",")).join("\n");
+      const encodedUri = encodeURI(csvContent);
+      const link = document.createElement("a");
+      link.setAttribute("href", encodedUri);
+      link.setAttribute("download", "immunization_records.csv");
+      document.body.appendChild(link);
+      link.click();
+    }
+
+    // Print Records
+    function printRecords() {
+      window.print();
+    }
+
+    // Backup Data
+    async function backupData() {
+      try {
+        const allData = {
+          children: await db.children.toArray(),
+          vaccinations: await db.vaccinations.toArray(),
+          facility: await db.facility.toArray()
+        };
+        
+        const data = JSON.stringify(allData, null, 2);
+        const blob = new Blob([data], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = 'immunization_backup.json';
+        link.click();
+        URL.revokeObjectURL(url);
+        alert('Backup downloaded successfully!');
+      } catch (error) {
+        console.error('Error creating backup:', error);
+        alert('Error creating backup. Please try again.');
+      }
+    }
+
+    // Restore Data
+    document.getElementById('restoreFile').addEventListener('change', async function (e) {
+      const file = e.target.files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = async function (event) {
+          try {
+            const data = JSON.parse(event.target.result);
+            
+            // Clear existing data
+            await db.transaction('rw', db.children, db.vaccinations, db.facility, async () => {
+              await db.children.clear();
+              await db.vaccinations.clear();
+              await db.facility.clear();
+              
+              // Import new data
+              if (data.children) await db.children.bulkAdd(data.children);
+              if (data.vaccinations) await db.vaccinations.bulkAdd(data.vaccinations);
+              if (data.facility) await db.facility.bulkAdd(data.facility);
+            });
+            
+            // Reload the app
+            await initApp();
+            alert('Data restored successfully!');
+          } catch (error) {
+            console.error('Error restoring data:', error);
+            alert('Invalid backup file. Please upload a valid JSON file.');
+          }
+        };
+        reader.readAsText(file);
+      }
+    });
+
+    // Clear All Data
+    async function clearAllData() {
+      if (confirm('Are you sure you want to clear ALL data? This cannot be undone.')) {
+        try {
+          await db.transaction('rw', db.children, db.vaccinations, db.facility, async () => {
+            await db.children.clear();
+            await db.vaccinations.clear();
+            await db.facility.clear();
+          });
+          
+          children = [];
+          facilityName = '';
+          updateChildTable();
+          updateStats();
+          updateAllTables();
+          alert('All data has been cleared.');
+        } catch (error) {
+          console.error('Error clearing data:', error);
+          alert('Error clearing data. Please try again.');
+        }
+      }
+    }
+
+    // Open Help Modal
+    function openHelpModal() {
+      document.getElementById('helpModal').style.display = 'flex';
+    }
+
+    // View All Records
+    document.getElementById('viewAll').addEventListener('click', () => {
+      const modal = document.getElementById('viewRecordsModal');
+      modal.style.display = 'flex';
+
+      const select = document.getElementById('selectChildren');
+      select.innerHTML = children.map((child, index) => `
+        <option value="${index}">${child.regNo} - ${child.name}</option>
+      `).join('');
+    });
+
+    // View Selected Children Records
+    function viewSelectedChildrenRecords() {
+      const select = document.getElementById('selectChildren');
+      const selectedIndices = Array.from(select.selectedOptions).map(option => option.value);
+
+      const tbody = document.querySelector('#viewRecordsTable tbody');
+      tbody.innerHTML = '';
+
+      selectedIndices.forEach(index => {
+        const child = children[index];
+        const firstRow = document.createElement('tr');
+        firstRow.innerHTML = `
+          <td>${child.regNo}</td>
+          <td>${child.name}</td>
+          <td colspan="7"></td>
+        `;
+        tbody.appendChild(firstRow);
+
+        child.vaccinations.forEach(vaccination => {
+          const today = new Date();
+          let status = 'Upcoming';
+          let rowClass = '';
+          
+          if (vaccination.dateGiven) {
+            status = 'Completed';
+          } else if (vaccination.nextVisit) {
+            const nextVisitDate = new Date(vaccination.nextVisit);
+            if (nextVisitDate < today) {
+              const daysOverdue = Math.floor((today - nextVisitDate) / (1000 * 60 * 60 * 24));
+              status = `Overdue (${daysOverdue} days)`;
+              rowClass = 'highlight-red';
+            } else {
+              const daysUntil = Math.ceil((nextVisitDate - today) / (1000 * 60 * 60 * 24));
+              if (daysUntil <= 7) {
+                status = `Due in ${daysUntil} days`;
+                rowClass = 'highlight-yellow';
+              } else {
+                status = `Due in ${daysUntil} days`;
+              }
+            }
+          }
+
+          const row = document.createElement('tr');
+          if (rowClass) row.className = rowClass;
+          row.innerHTML = `
+            <td></td>
+            <td></td>
+            <td>${vaccination.vaccine}</td>
+            <td>${formatDate(vaccination.dateGiven) || 'N/A'}</td>
+            <td>${vaccination.batchNumber || 'N/A'}</td>
+            <td>${vaccination.placeGiven || 'N/A'}</td>
+            <td>${vaccination.remarks || 'N/A'}</td>
+            <td>${formatDate(vaccination.nextVisit) || 'N/A'}</td>
+            <td>${status}</td>
+          `;
+          tbody.appendChild(row);
+        });
+      });
+    }
+
+    // Format date to DD/MM/YYYY
+    function formatDate(dateString) {
+      if (!dateString) return '';
+      const date = new Date(dateString);
+      const day = String(date.getDate()).padStart(2, '0');
+      const month = String(date.getMonth() + 1).padStart(2, '0');
+      const year = date.getFullYear();
+      return `${day}/${month}/${year}`;
+    }
+
+    // Update All Tables
+    function updateAllTables() {
+      updateAllRecordsTable();
+      updateDefaultersTable();
+      updateDueSoonTable();
+      updateUpcomingTable();
+    }
+
+    // Update All Records Table - Now shows each child only once with summary info
+    function updateAllRecordsTable() {
+      const tbody = document.querySelector('#allRecordsTable tbody');
+      tbody.innerHTML = '';
+
+      children.forEach((child, index) => {
+        const today = new Date();
+        
+        // Get completed vaccines
+        const completedVaccines = child.vaccinations
+          .filter(v => v.dateGiven)
+          .map(v => v.vaccine.split(' at ')[0])
+          .join(', ');
+        
+        // Get booked vaccines with next visit dates
+        const bookedVaccines = child.vaccinations
+          .filter(v => v.nextVisit && !v.dateGiven)
+          .map(v => ({
+            vaccine: v.vaccine.split(' at ')[0],
+            nextVisit: v.nextVisit
+          }));
+        
+        // Find the earliest next visit date
+        const nextVisitDates = bookedVaccines.map(v => new Date(v.nextVisit));
+        const earliestNextVisit = nextVisitDates.length > 0 ? 
+          new Date(Math.min(...nextVisitDates)) : null;
+        
+        // Determine status
+        let status = 'Up to date';
+        let rowClass = '';
+        
+        if (bookedVaccines.length > 0) {
+          if (earliestNextVisit < today) {
+            const daysOverdue = Math.floor((today - earliestNextVisit) / (1000 * 60 * 60 * 24));
+            status = `Overdue (${daysOverdue} days)`;
+            rowClass = 'highlight-red';
+          } else {
+            const daysUntil = Math.ceil((earliestNextVisit - today) / (1000 * 60 * 60 * 24));
+            if (daysUntil <= 7) {
+              status = `Due in ${daysUntil} days`;
+              rowClass = 'highlight-yellow';
+            } else {
+              status = `Due in ${daysUntil} days`;
+            }
+          }
+        }
+
+        const row = document.createElement('tr');
+        if (rowClass) row.className = rowClass;
+        row.innerHTML = `
+          <td>${child.regNo}</td>
+          <td>${child.name}</td>
+          <td>${completedVaccines || 'None'}</td>
+          <td>${bookedVaccines.map(v => `${v.vaccine}`).join(', ') || 'None'}</td>
+          <td>${earliestNextVisit ? formatDate(earliestNextVisit) : 'N/A'}</td>
+          <td>${status}</td>
+          <td><button onclick="openImmunizationModal(${index})">Update</button></td>
+        `;
+        tbody.appendChild(row);
+      });
+    }
+
+    // Update Defaulters Table - Now counts each child only once
+    function updateDefaultersTable() {
+      const today = new Date();
+      const defaultersList = [];
+      const countedChildren = new Set(); // Track children we've already counted
+      
+      // Find all defaulters (children with missed Next Visit dates)
+      children.forEach(child => {
+        if (countedChildren.has(child.regNo)) return; // Skip if already counted
+        
+        const missedVaccines = child.vaccinations.filter(v => {
+          if (v.nextVisit && !v.dateGiven) {
+            const nextVisitDate = new Date(v.nextVisit);
+            return nextVisitDate < today;
+          }
+          return false;
+        });
+        
+        if (missedVaccines.length > 0) {
+          countedChildren.add(child.regNo); // Mark this child as counted
+          
+          // Find the most overdue vaccine for this child
+          const mostOverdue = missedVaccines.reduce((prev, current) => {
+            const prevDate = new Date(prev.nextVisit);
+            const currentDate = new Date(current.nextVisit);
+            return prevDate < currentDate ? prev : current;
+          });
+          
+          const nextVisitDate = new Date(mostOverdue.nextVisit);
+          const daysOverdue = Math.floor((today - nextVisitDate) / (1000 * 60 * 60 * 24));
+          
+          defaultersList.push({
+            child,
+            vaccination: mostOverdue,
+            daysOverdue
+          });
+        }
+      });
+
+      const tbody = document.querySelector('#defaultersTable tbody');
+      tbody.innerHTML = defaultersList.map(defaulter => {
+        return `
+          <tr>
+            <td>${defaulter.child.regNo}</td>
+            <td>${defaulter.child.name}</td>
+            <td>${defaulter.vaccination.vaccine.split(' at ')[0]}</td>
+            <td class="highlight-red">${formatDate(defaulter.vaccination.nextVisit)}</td>
+            <td class="highlight-red">${defaulter.daysOverdue}</td>
+            <td><button onclick="openImmunizationModal(${children.indexOf(defaulter.child)})">Update</button></td>
+          </tr>
+        `;
+      }).join('');
+
+      if (defaultersList.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="6" style="text-align: center;">No defaulters found</td></tr>';
+      }
+    }
+
+    // Update Due Soon Table (7 days)
+    function updateDueSoonTable() {
+      const today = new Date();
+      const dueSoonList = [];
+      const countedChildren = new Set(); // Track children we've already counted
+      
+      // Find all vaccines due in the next 7 days
+      children.forEach(child => {
+        if (countedChildren.has(child.regNo)) return; // Skip if already counted
+        
+        const dueSoonVaccines = child.vaccinations.filter(v => {
+          if (v.nextVisit && !v.dateGiven) {
+            const nextVisitDate = new Date(v.nextVisit);
+            const daysUntil = Math.ceil((nextVisitDate - today) / (1000 * 60 * 60 * 24));
+            return daysUntil > 0 && daysUntil <= 7;
+          }
+          return false;
+        });
+        
+        if (dueSoonVaccines.length > 0) {
+          countedChildren.add(child.regNo); // Mark this child as counted
+          
+          // Find the vaccine with the closest due date
+          const closestDue = dueSoonVaccines.reduce((prev, current) => {
+            const prevDate = new Date(prev.nextVisit);
+            const currentDate = new Date(current.nextVisit);
+            return prevDate < currentDate ? prev : current;
+          });
+          
+          const nextVisitDate = new Date(closestDue.nextVisit);
+          const daysUntil = Math.ceil((nextVisitDate - today) / (1000 * 60 * 60 * 24));
+          
+          dueSoonList.push({
+            child,
+            vaccination: closestDue,
+            daysUntil
+          });
+        }
+      });
+
+      const tbody = document.querySelector('#dueSoonTable tbody');
+      tbody.innerHTML = dueSoonList.map(item => {
+        return `
+          <tr>
+            <td>${item.child.regNo}</td>
+            <td>${item.child.name}</td>
+            <td>${item.vaccination.vaccine.split(' at ')[0]}</td>
+            <td class="highlight-yellow">${formatDate(item.vaccination.nextVisit)}</td>
+            <td class="highlight-yellow">${item.daysUntil}</td>
+            <td><button onclick="openImmunizationModal(${children.indexOf(item.child)})">Update</button></td>
+          </tr>
+        `;
+      }).join('');
+
+      if (dueSoonList.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="6" style="text-align: center;">No vaccines due in the next 7 days</td></tr>';
+      }
+    }
+
+    // Update Upcoming Table (30 days)
+    function updateUpcomingTable() {
+      const today = new Date();
+      const upcomingList = [];
+      const countedChildren = new Set(); // Track children we've already counted
+      
+      // Find all vaccines due in the next 30 days (but more than 7 days)
+      children.forEach(child => {
+        if (countedChildren.has(child.regNo)) return; // Skip if already counted
+        
+        const upcomingVaccines = child.vaccinations.filter(v => {
+          if (v.nextVisit && !v.dateGiven) {
+            const nextVisitDate = new Date(v.nextVisit);
+            const daysUntil = Math.ceil((nextVisitDate - today) / (1000 * 60 * 60 * 24));
+            return daysUntil > 7 && daysUntil <= 30;
+          }
+          return false;
+        });
+        
+        if (upcomingVaccines.length > 0) {
+          countedChildren.add(child.regNo); // Mark this child as counted
+          
+          // Find the vaccine with the closest due date
+          const closestDue = upcomingVaccines.reduce((prev, current) => {
+            const prevDate = new Date(prev.nextVisit);
+            const currentDate = new Date(current.nextVisit);
+            return prevDate < currentDate ? prev : current;
+          });
+          
+          const nextVisitDate = new Date(closestDue.nextVisit);
+          const daysUntil = Math.ceil((nextVisitDate - today) / (1000 * 60 * 60 * 24));
+          
+          upcomingList.push({
+            child,
+            vaccination: closestDue,
+            daysUntil
+          });
+        }
+      });
+
+      const tbody = document.querySelector('#upcomingTable tbody');
+      tbody.innerHTML = upcomingList.map(item => {
+        return `
+          <tr>
+            <td>${item.child.regNo}</td>
+            <td>${item.child.name}</td>
+            <td>${item.vaccination.vaccine.split(' at ')[0]}</td>
+            <td>${formatDate(item.vaccination.nextVisit)}</td>
+            <td>${item.daysUntil}</td>
+            <td><button onclick="openImmunizationModal(${children.indexOf(item.child)})">Update</button></td>
+          </tr>
+        `;
+      }).join('');
+
+      if (upcomingList.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="6" style="text-align: center;">No vaccines due in the next 30 days</td></tr>';
+      }
+    }
+
+    // Update Stats - Now counts each child only once
+    function updateStats() {
+      const today = new Date();
+      let defaulterCount = 0;
+      let dueSoonCount = 0;
+      let upcomingCount = 0;
+      const countedDefaulters = new Set();
+      const countedDueSoon = new Set();
+      const countedUpcoming = new Set();
+      
+      children.forEach(child => {
+        let isDefaulter = false;
+        let isDueSoon = false;
+        let isUpcoming = false;
+        
+        child.vaccinations.forEach(vaccination => {
+          if (vaccination.nextVisit && !vaccination.dateGiven) {
+            const nextVisitDate = new Date(vaccination.nextVisit);
+            if (nextVisitDate < today) {
+              isDefaulter = true;
+            } else {
+              const daysUntil = Math.ceil((nextVisitDate - today) / (1000 * 60 * 60 * 24));
+              if (daysUntil <= 7) {
+                isDueSoon = true;
+              } else if (daysUntil <= 30) {
+                isUpcoming = true;
+              }
+            }
+          }
+        });
+        
+        if (isDefaulter) defaulterCount++;
+        if (isDueSoon) dueSoonCount++;
+        if (isUpcoming) upcomingCount++;
+      });
+      
+      document.getElementById('totalChildren').textContent = children.length;
+      document.getElementById('totalDefaulters').textContent = defaulterCount;
+      document.getElementById('totalDueSoon').textContent = dueSoonCount;
+      document.getElementById('totalUpcoming').textContent = upcomingCount;
+    }
+
+    // Tab Navigation
+    function openTab(tabId) {
+      // Hide all tab contents
+      document.querySelectorAll('.tab-content').forEach(tab => {
+        tab.classList.remove('active');
+      });
+      
+      // Deactivate all tab buttons
+      document.querySelectorAll('.tab-button').forEach(button => {
+        button.classList.remove('active');
+      });
+      
+      // Activate the selected tab
+      document.getElementById(tabId).classList.add('active');
+      
+      // Activate the button for the selected tab
+      event.currentTarget.classList.add('active');
+    }
+
+    // Initialize the app when the page loads
+    document.addEventListener('DOMContentLoaded', initApp);
+  </script>
 </body>
 </html>
